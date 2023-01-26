@@ -77,7 +77,7 @@ endif()
 
 link_directories(${VULKAN_PATH}/Bin;${VULKAN_PATH}/Lib;)
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC libffi Detours d3d9 d3d10 d3d11 d3d12 OpenGL32 ${Vulkan_LIBRARY})
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC Detours libffi spdlog d3d9 d3d10 d3d11 d3d12 OpenGL32 ${Vulkan_LIBRARY})
 target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /GS- /GR-)
 target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_20)
 
