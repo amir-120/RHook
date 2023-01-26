@@ -25,7 +25,7 @@ file(COPY ${LIBFFI_PATH}/src/${TARGETDIR}/ffitarget.h DESTINATION ${LIBFFI_BINAR
 include_directories(${LIBFFI_BINARY_DIR}/include)
 include_directories(${LIBFFI_BINARY_DIR})
 
-add_definitions(-DFFI_BUILDING)
+add_definitions(-DFFI_STATIC_BUILD)
 
 add_library(${LIBFFI_PROJEC_NAME} STATIC 
             ${SOURCES_LIST})

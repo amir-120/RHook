@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 
 project(RHook)
 
-include_directories(${CMAKE_SOURCE_DIR}/dependencies/Detours/Detours/include)
+include_directories(${CMAKE_SOURCE_DIR}/dependencies/Detours/Detours/src)
 include_directories(${CMAKE_SOURCE_DIR}/dependencies/spdlog/include)
 include_directories(${CMAKE_SOURCE_DIR}/dependencies/libffi/libffi/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/dependencies/libffi/libffi/include)

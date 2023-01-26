@@ -2,7 +2,6 @@
 #include "Log/Logging.hpp"
 
 #include <detours.h>
-#define FFI_BUILDING
 #include <ffi.h>
 
 namespace RHook {

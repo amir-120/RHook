@@ -1,3 +1,4 @@
+@echo off
 git submodule init
 git submodule update
 mkdir "VS2022 x86"
