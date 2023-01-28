@@ -850,25 +850,6 @@ namespace RHook {
 		inline static VkDeviceCommandsMap s_DeviceCommandMap{};
 		inline static VkInstanceCommandsMap s_InstanceCommandMap{};
 
-		// Vulkan objects to parents maps
-		inline static VkObjectHandleMap<VkFence, VkDevice> s_FenceMap{};
-		inline static VkObjectHandleMap<VkSemaphore, VkDevice> s_SemaphoreMap{};
-		inline static VkObjectHandleMap<VkEvent, VkDevice> s_EventMap{};
-		inline static VkObjectHandleMap<VkQueryPool, VkDevice> s_QueryPoolMap{};
-		inline static VkObjectHandleMap<VkBuffer, VkDevice> s_BufferMap{};
-		inline static VkObjectHandleMap<VkBufferView, VkDevice> s_BufferViewMap{};
-		inline static VkObjectHandleMap<VkSwapchainKHR, VkDevice> s_SwapchainKHRMap{};
-		inline static VkObjectHandleMap<VkRenderPass, VkDevice> s_RenderPassMap{};
-		inline static VkObjectHandleMap<VkImage, VkDevice> s_ImageMap{};
-		inline static VkObjectHandleMap<VkImageView, VkDevice> s_ImageViewMap{};
-		inline static VkObjectHandleMap<VkPipeline, VkDevice> s_PipelineMap{};
-		inline static VkObjectHandleMap<VkFramebuffer, VkDevice> s_FramebufferMap{};
-		inline static VkObjectHandleMap<VkDescriptorPool, VkDevice> s_DescriptorPoolMap{};
-		inline static VkObjectHandleMap<VkQueue, VkDevice> s_QueueMap{};
-		inline static VkObjectHandleMap<VkCommandBuffer, VkDevice> s_CMDBufferMap{};
-
-		inline static VkObjectHandleMap<VkSurfaceKHR, VkInstance> s_SurfaceKHRMap{};
-
 		// Hooks
 		inline static std::array<std::unique_ptr<SmartFunctionHook>, (size_t)HIdx::Size> s_HookList;
 		inline static std::array<bool, (size_t)HIdx::Size> s_DetourExecutionList{};
@@ -877,36 +858,6 @@ namespace RHook {
 
 		// Callbacks to actually do work when the hooked functions get called.
 		std::array<CallBackFn, (size_t)HIdx::Size> m_OnPreFunctionCallList{ nullptr }, m_OnPostFunctionCallList{ nullptr };
-
-	// Utility functions
-	protected:
-		inline static void RemoveDeviceFromMaps(VkDevice device) {
-			s_DeviceCommandMap.RemoveDevice(device);
-
-			s_SemaphoreMap.RemoveParent(device);
-			s_EventMap.RemoveParent(device);
-			s_QueryPoolMap.RemoveParent(device);
-			s_BufferMap.RemoveParent(device);
-			s_ImageMap.RemoveParent(device);
-			s_ImageViewMap.RemoveParent(device);
-			s_PipelineMap.RemoveParent(device);
-			s_FramebufferMap.RemoveParent(device);
-			s_DescriptorPoolMap.RemoveParent(device);
-			s_SwapchainKHRMap.RemoveParent(device);
-			s_RenderPassMap.RemoveParent(device);
-			s_QueueMap.RemoveParent(device);
-			s_CMDBufferMap.RemoveParent(device);
-
-			s_ActiveDevices.erase(std::remove(s_ActiveDevices.begin(), s_ActiveDevices.end(), device), s_ActiveDevices.end());
-		}
-
-		inline static void RemoveInstanceFromMaps(VkInstance instance) {
-			s_InstanceCommandMap.RemoveInstance(instance);
-
-			s_SurfaceKHRMap.RemoveParent(instance);
-
-			s_ActiveInstances.erase(std::remove(s_ActiveInstances.begin(), s_ActiveInstances.end(), instance), s_ActiveInstances.end());
-		}
 
 	// Detour functions
 	protected:

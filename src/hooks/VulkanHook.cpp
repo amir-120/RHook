@@ -677,26 +677,6 @@ namespace RHook {
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateDevice, physicalDevice, pCreateInfo, pAllocator, pDevice);
 
-		//Add the device to the list
-		if (result == VK_SUCCESS) {
-			s_ActiveDevices.push_back(*pDevice);
-		}
-
-		// Map the VkQueues of the device
-		{
-			uint32_t count;
-			vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &count, NULL);
-			
-			for (size_t i = 0; i < pCreateInfo->queueCreateInfoCount; i++) {
-				for (size_t j = 0; j < pCreateInfo->pQueueCreateInfos[i].queueCount; j++) {
-					VkQueue queue;
-					vkGetDeviceQueue(*pDevice, pCreateInfo->pQueueCreateInfos[i].queueFamilyIndex, j, &queue);
-
-					s_QueueMap.Map(queue, *pDevice);
-				}
-			}
-		}
-
 		return result;
 	}
 
@@ -707,11 +687,6 @@ namespace RHook {
 
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateFence, device, pCreateInfo, pAllocator, pFence);
-
-		// Map the created VkFence
-		if (result == VK_SUCCESS) {
-			s_FenceMap.Map(*pFence, device);
-		}
 
 		return result;
 	}
@@ -724,11 +699,6 @@ namespace RHook {
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateSemaphore, device, pCreateInfo, pAllocator, pSemaphore);
 
-		// Map the created VkSemaphore
-		if (result == VK_SUCCESS) {
-			s_SemaphoreMap.Map(*pSemaphore, device);
-		}
-
 		return result;
 	}
 
@@ -739,11 +709,6 @@ namespace RHook {
 
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateEvent, device, pCreateInfo, pAllocator, pEvent);
-
-		// Map the created VkEvent
-		if (result == VK_SUCCESS) {
-			s_EventMap.Map(*pEvent, device);
-		}
 
 		return result;
 	}
@@ -756,11 +721,6 @@ namespace RHook {
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateQueryPool, device, pCreateInfo, pAllocator, pQueryPool);
 
-		// Map the created VkQueryPool
-		if (result == VK_SUCCESS) {
-			s_QueryPoolMap.Map(*pQueryPool, device);
-		}
-
 		return result;
 	}
 
@@ -771,11 +731,6 @@ namespace RHook {
 
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateBuffer, device, pCreateInfo, pAllocator, pBuffer);
-
-		// Map the created VkBuffer
-		if (result == VK_SUCCESS) {
-			s_BufferMap.Map(*pBuffer, device);
-		}
 
 		return result;
 	}
@@ -788,11 +743,6 @@ namespace RHook {
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateBufferView, device, pCreateInfo, pAllocator, pView);
 
-		// Map the created VkBufferView
-		if (result == VK_SUCCESS) {
-			s_BufferViewMap.Map(*pView, device);
-		}
-
 		return result;
 	}
 
@@ -803,11 +753,6 @@ namespace RHook {
 
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateImage, device, pCreateInfo, pAllocator, pImage);
-
-		// Map the created VkImage
-		if (result == VK_SUCCESS) {
-			s_ImageMap.Map(*pImage, device);
-		}
 
 		return result;
 	}
@@ -820,11 +765,6 @@ namespace RHook {
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateImageView, device, pCreateInfo, pAllocator, pView);
 
-		// Map the created VkImageView
-		if (result == VK_SUCCESS) {
-			s_ImageViewMap.Map(*pView, device);
-		}
-
 		return result;
 	}
 
@@ -835,13 +775,6 @@ namespace RHook {
 
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateGraphicsPipelines, device, pipelineCache, createInfoCount, pCreateInfos, pAllocator, pPipelines);
-
-		// Map the created VkPipeLines
-		if (result == VK_SUCCESS) {
-			for (size_t i = 0; i < createInfoCount; i++) {
-				s_PipelineMap.Map(pPipelines[i], device);
-			}
-		}
 
 		return result;
 	}
@@ -854,11 +787,6 @@ namespace RHook {
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateFramebuffer, device, pCreateInfo, pAllocator, pFramebuffer);
 
-		// Map the created VkFramebuffer
-		if (result == VK_SUCCESS) {
-			s_FramebufferMap.Map(*pFramebuffer, device);
-		}
-
 		return result;
 	}
 
@@ -869,11 +797,6 @@ namespace RHook {
 
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateDescriptorPool, device, pCreateInfo, pAllocator, pDescriptorPool);
-
-		// Map the created VkDescriptorPool
-		if (result == VK_SUCCESS) {
-			s_DescriptorPoolMap.Map(*pDescriptorPool, device);
-		}
 
 		return result;
 	}
@@ -886,11 +809,6 @@ namespace RHook {
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateWin32SurfaceKHR, instance, pCreateInfo, pAllocator, pSurface);
 
-		// Map the created VkSurface
-		if (result == VK_SUCCESS) {
-			s_SurfaceKHRMap.Map(*pSurface, instance);
-		}
-
 		return result;
 	}
 
@@ -902,11 +820,6 @@ namespace RHook {
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateSwapchainKHR, device, pCreateInfo, pAllocator, pSwapchain);
 
-		// Map the created VkSwapchainKHR
-		if (result == VK_SUCCESS) {
-			s_SwapchainKHRMap.Map(*pSwapchain, device);
-		}
-
 		return result;
 	}
 
@@ -917,11 +830,6 @@ namespace RHook {
 
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkCreateRenderPass, device, pCreateInfo, pAllocator, pRenderPass);
-
-		// Map the created VkRenderPass
-		if (result == VK_SUCCESS) {
-			s_RenderPassMap.Map(*pRenderPass, device);
-		}
 
 		return result;
 	}
@@ -935,13 +843,6 @@ namespace RHook {
 
 		static VkResult result = {};
 		DETOUR_RETURN(result, VkAllocateCommandBuffers, device, pAllocateInfo, pCommandBuffers);
-
-		// Map the created VkCommandBuffers
-		if (result == VK_SUCCESS) {
-			for (size_t i = 0; i < pAllocateInfo->commandBufferCount; i++) {
-				s_QueueMap.Map((VkQueue)pCommandBuffers[i], device); //s_CMDBufferMap.Map(pCommandBuffers[i], device);
-			}
-		}
 
 		return result;
 	}
@@ -1035,11 +936,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkFreeCommandBuffers, device, commandPool, commandBufferCount, pCommandBuffers);
-
-		// Remove the destroyed VkCommandBuffers from the map
-		for (size_t i = 0; i < commandBufferCount; i++) {
-			s_QueueMap.RemoveObject((VkQueue)pCommandBuffers[i]); //s_CMDBufferMap.RemoveObject(pCommandBuffers[i]);
-		}
 	}
 
 
@@ -1050,9 +946,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyRenderPass, device, renderPass, pAllocator);
-
-		// Remove the destroyed VkRenderPass from the map
-		s_RenderPassMap.RemoveObject(renderPass);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroySwapchainKHR = 0;
@@ -1061,9 +954,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroySwapchainKHR, device, swapchain, pAllocator);
-
-		// Remove the destroyed VkSwapchainKHR from the map
-		s_SwapchainKHRMap.RemoveObject(swapchain);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroySurfaceKHR = 0;
@@ -1072,9 +962,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroySurfaceKHR, instance, surface, pAllocator);
-
-		// Remove the destroyed VkSurface from the map
-		s_SurfaceKHRMap.RemoveObject(surface);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroyDescriptorPool = 0;
@@ -1083,9 +970,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyDescriptorPool, device, descriptorPool, pAllocator);
-
-		// Remove the destroyed VkDescriptorPool from the map
-		s_DescriptorPoolMap.RemoveObject(descriptorPool);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroyFramebuffer = 0;
@@ -1094,9 +978,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyFramebuffer, device, framebuffer, pAllocator);
-
-		// Remove the destroyed VkFramebuffer from the map
-		s_FramebufferMap.RemoveObject(framebuffer);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroyPipeline = 0;
@@ -1105,9 +986,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyPipeline, device, pipeline, pAllocator);
-
-		// Remove the destroyed VkPipeline from the map
-		s_PipelineMap.RemoveObject(pipeline);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroyImageView = 0;
@@ -1116,9 +994,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyImageView, device, imageView, pAllocator);
-
-		// Remove the destroyed VkImageView from the map
-		s_ImageViewMap.RemoveObject(imageView);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroyImage = 0;
@@ -1127,9 +1002,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyImage, device, image, pAllocator);
-
-		// Remove the destroyed VkImage from the map
-		s_ImageMap.RemoveObject(image);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroyBufferView = 0;
@@ -1138,9 +1010,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyBufferView, device, bufferView, pAllocator);
-
-		// Remove the destroyed VkBufferView from the map
-		s_BufferViewMap.RemoveObject(bufferView);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroyBuffer = 0;
@@ -1149,9 +1018,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyBuffer, device, buffer, pAllocator);
-
-		// Remove the destroyed VkBuffer from the map
-		s_BufferMap.RemoveObject(buffer);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroyQueryPool = 0;
@@ -1160,9 +1026,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyQueryPool, device, queryPool, pAllocator);
-
-		// Remove the destroyed VkQueryPool from the map
-		s_QueryPoolMap.RemoveObject(queryPool);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroyEvent = 0;
@@ -1171,9 +1034,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyEvent, device, event, pAllocator);
-
-		// Remove the destroyed VkEvent from the map
-		s_EventMap.RemoveObject(event);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroySemaphore = 0;
@@ -1182,9 +1042,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroySemaphore, device, semaphore, pAllocator);
-
-		// Remove the destroyed VkSemaphore from the map
-		s_SemaphoreMap.RemoveObject(semaphore);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroyFence = 0;
@@ -1193,9 +1050,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyFence, device, fence, pAllocator);
-
-		// Remove the destroyed VkFence from the map
-		s_FenceMap.RemoveObject(fence);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroyDevice = 0;
@@ -1204,9 +1058,6 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyDevice, device, pAllocator);
-
-		// Remove the destroyed VkDevice from the maps and the active device list
-		RemoveDeviceFromMaps(device);
 	}
 
 	thread_local size_t g_VKCallDepthVkDestroyInstance = 0;
@@ -1215,8 +1066,5 @@ namespace RHook {
 		std::scoped_lock _{ *g_VulkanHook->m_HookMutex };
 
 		DETOUR_VOID(VkDestroyInstance, instance, pAllocator);
-
-		// Remove the destroyed VkInstance from the maps and the active instance list
-		RemoveInstanceFromMaps(instance);
 	}
 }
