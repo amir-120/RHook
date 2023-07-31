@@ -7,6 +7,7 @@ namespace RHook {
 
 	std::shared_ptr<spdlog::logger> Log::s_RHookLogger{};
 	std::shared_ptr<spdlog::logger> Log::s_UserLogger{};
+	bool Log::s_Inited{ false };
 
 	void Log::Init()
 	{
@@ -27,6 +28,26 @@ namespace RHook {
 		spdlog::register_logger(s_UserLogger);
 		s_UserLogger->set_level(spdlog::level::trace);
 		s_UserLogger->flush_on(spdlog::level::trace);
+	}
+
+	std::shared_ptr<spdlog::logger>& Log::GetRHookLogger()
+	{
+		if (!s_Inited) {
+			Log::Init();
+			s_Inited = true;
+		}
+
+		return s_RHookLogger;
+	}
+
+	std::shared_ptr<spdlog::logger>& Log::GetUserLogger()
+	{
+		if (!s_Inited) {
+			Log::Init();
+			s_Inited = true;
+		}
+
+		return s_UserLogger;
 	}
 
 }

@@ -3,10 +3,10 @@
 namespace RHook {
     VtableHook::VtableHook()
         : m_rawData{},
-        m_vtablePtr(),
-        m_newVTable(nullptr),
-        m_oldVTable(),
-        m_vtableSize(0)
+        m_VtablePtr(),
+        m_NewVTable(nullptr),
+        m_OldVTable(),
+        m_VtableSize(0)
     {}
 
     VtableHook::VtableHook(Address target)
@@ -17,15 +17,15 @@ namespace RHook {
 
     VtableHook::VtableHook(VtableHook&& other)
         : m_rawData(move(other.m_rawData)),
-        m_vtablePtr(other.m_vtablePtr),
-        m_newVTable(other.m_newVTable),
-        m_oldVTable(other.m_oldVTable),
-        m_vtableSize(other.m_vtableSize)
+        m_VtablePtr(other.m_VtablePtr),
+        m_NewVTable(other.m_NewVTable),
+        m_OldVTable(other.m_OldVTable),
+        m_VtableSize(other.m_VtableSize)
     {
-        other.m_vtablePtr = nullptr;
-        other.m_newVTable = nullptr;
-        other.m_oldVTable = nullptr;
-        other.m_vtableSize = 0;
+        other.m_VtablePtr = nullptr;
+        other.m_NewVTable = nullptr;
+        other.m_OldVTable = nullptr;
+        other.m_VtableSize = 0;
     }
 
     VtableHook::~VtableHook() {
@@ -38,26 +38,26 @@ namespace RHook {
             m_rawData.clear();
         }
 
-        m_vtablePtr = target;
-        m_oldVTable = m_vtablePtr.To<Address>();
-        m_vtableSize = get_vtable_size(m_oldVTable);
+        m_VtablePtr = target;
+        m_OldVTable = m_VtablePtr.To<Address>();
+        m_VtableSize = GetVTableSize(m_OldVTable);
         // RTTI.
-        m_rawData.resize(m_vtableSize + 1);
-        m_newVTable = m_rawData.data() + 1;
+        m_rawData.resize(m_VtableSize + 1);
+        m_NewVTable = m_rawData.data() + 1;
 
-        memcpy(m_rawData.data(), m_oldVTable.As<Address*>() - 1, sizeof(Address) * (m_vtableSize + 1));
+        memcpy(m_rawData.data(), m_OldVTable.As<Address*>() - 1, sizeof(Address) * (m_VtableSize + 1));
 
         // At this point we have the address of the old vtable, and a copy of it
         // stored in m_new_vtable.  Set the target objects vtable
         // pointer to our copy of the original.
-        *m_vtablePtr.As<Address*>() = m_newVTable;
+        *m_VtablePtr.As<Address*>() = m_NewVTable;
 
         return true;
     }
 
     bool VtableHook::Recreate() {
-        if (m_vtablePtr != nullptr) {
-            *m_vtablePtr.As<Address*>() = m_newVTable;
+        if (m_VtablePtr != nullptr) {
+            *m_VtablePtr.As<Address*>() = m_NewVTable;
             return true;
         }
 
@@ -66,8 +66,8 @@ namespace RHook {
 
     bool VtableHook::Remove() {
         // Can cause issues where we set the vtable/random memory of some other pointer.
-        if (m_vtablePtr != nullptr && IsBadReadPtr(m_vtablePtr.Ptr(), sizeof(void*)) == FALSE && m_vtablePtr.To<void*>() == m_newVTable) {
-            *m_vtablePtr.As<Address*>() = m_oldVTable;
+        if (m_VtablePtr != nullptr && IsBadReadPtr(m_VtablePtr.Ptr(), sizeof(void*)) == FALSE && m_VtablePtr.To<void*>() == m_NewVTable) {
+            *m_VtablePtr.As<Address*>() = m_OldVTable;
             return true;
         }
 
@@ -75,15 +75,15 @@ namespace RHook {
     }
 
     bool VtableHook::HookMethod(uint32_t index, Address newMethod) {
-        if (m_oldVTable != nullptr && m_newVTable != nullptr && index < m_vtableSize) {
-            m_newVTable[index] = newMethod;
+        if (m_OldVTable != nullptr && m_NewVTable != nullptr && index < m_VtableSize) {
+            m_NewVTable[index] = newMethod;
             return true;
         }
 
         return false;
     }
 
-    size_t VtableHook::get_vtable_size(Address vtable) {
+    size_t VtableHook::GetVTableSize(Address vtable) {
         size_t i = 0;
 
         for (; vtable.As<Address*>()[i] != nullptr; ++i) {

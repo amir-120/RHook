@@ -3,6 +3,7 @@
 #include "D3DDXGIVMTIndices.hpp"
 
 #include "Log/Logging.hpp"
+#include "utility/Thread.hpp"
 
 namespace RHook {
 	static DXGIHook* g_DXGIHook = nullptr;
@@ -74,11 +75,15 @@ namespace RHook {
 		auto realResizeBuffersFn = (*(uintptr_t**)m_PSwapChain.Get())[(size_t)IDXGISwapChainVMT::ResizeBuffers]; // ResizeBuffers
 		auto realResizeTargetFn = (*(uintptr_t**)m_PSwapChain.Get())[(size_t)IDXGISwapChainVMT::ResizeTarget]; // ResizeTarget
 
+		ThreadSuspender suspender{};
+
 #define ADD_HOOK(SYMBOL) s_HookList[(size_t)HIdx::SYMBOL] = std::make_unique<FunctionHook>(real##SYMBOL##Fn, (uintptr_t)&DXGIHook::SYMBOL, #SYMBOL"()");
 
 		ADD_HOOK(Present)
 		ADD_HOOK(ResizeBuffers)
 		ADD_HOOK(ResizeTarget)
+
+		suspender.Resume();
 
 		// Enable detours
 		for (auto& execute : s_DetourExecutionList) {

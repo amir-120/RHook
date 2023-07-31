@@ -4,6 +4,7 @@
 #include <detours.h>
 
 namespace RHook {
+
 	FunctionHook::FunctionHook(Address target, Address destination)
 	{
 		RH_RHOOK_INFO("[FUNCTION HOOK] Setting up a hook on {:p}->{:p}", target.Ptr(), destination.Ptr());
@@ -28,7 +29,21 @@ namespace RHook {
 		Remove();
 	}
 
-	bool FunctionHook::Create() {
+	bool FunctionHook::Create() 
+	{
+		extern bool g_IsMSDetoursInitilized;
+
+		if (!g_IsMSDetoursInitilized) {
+			if (DetourRestoreAfterWith() == TRUE) {
+				RH_RHOOK_INFO("[FUNCTION HOOK] MS Detours initialized successfully.");
+			}
+			else {
+				RH_RHOOK_ERROR("[FUNCTION HOOK] MS Detours failed to initiliaze.");
+			}
+
+			g_IsMSDetoursInitilized = true;
+		}
+
 		if (m_Target == 0 || m_Destination == 0 || m_Original != 0) {
 			RH_RHOOK_ERROR("[FUNCTION HOOK] \"{:s}\" Hook not initialized", m_Name.empty() ? "Unnamed" : m_Name.c_str());
 			return false;

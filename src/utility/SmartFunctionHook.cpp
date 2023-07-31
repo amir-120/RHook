@@ -32,6 +32,19 @@ namespace RHook {
 
 	bool SmartFunctionHook::Create()
 	{
+		extern bool g_IsMSDetoursInitilized;
+
+		if (!g_IsMSDetoursInitilized) {
+			if (DetourRestoreAfterWith() == TRUE) {
+				RH_RHOOK_INFO("[FUNCTION HOOK] MS Detours initialized successfully.");
+			}
+			else {
+				RH_RHOOK_ERROR("[FUNCTION HOOK] MS Detours failed to initiliaze.");
+			}
+
+			g_IsMSDetoursInitilized = true;
+		}
+
 		if (m_Target == 0 || m_Destination == 0 || m_Original != nullptr) {
 			RH_RHOOK_ERROR("[SMART FUNCTION HOOK] \"{:s}\" Hook not initialized", m_Name.empty() ? "Unnamed" : m_Name.c_str());
 			return false;

@@ -17,6 +17,7 @@ namespace RHook {
 		SmartFunctionHook(CType* target, CType* destination, SmartFunctionHook** ppActiveHook)
 			: m_Target(target), m_Destination(destination), m_ppActiveHook(ppActiveHook)
 		{
+
 			auto setupFn = &SmartFunctionHook::Setup<CType>;
 			using setup_t = bool(SmartFunctionHook*);
 

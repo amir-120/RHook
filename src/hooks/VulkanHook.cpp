@@ -1,5 +1,6 @@
 #include "VulkanHook.hpp"
 
+#include "utility/Thread.hpp"
 #include "Log/Logging.hpp"
 
 namespace RHook {
@@ -300,6 +301,9 @@ namespace RHook {
 			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyInstance() export.");
 			return false;
 		}
+
+		ThreadSuspender suspender{};
+
 #define ADD_HOOK(SYMBOL, NAME) s_HookList[(size_t)HIdx::SYMBOL] = std::make_unique<SmartFunctionHook>(real##SYMBOL##Fn, &VulkanHook::SYMBOL, &m_ActiveHookList[(size_t)HIdx::SYMBOL], NAME);
 		
 		// Loader exports
@@ -353,6 +357,8 @@ namespace RHook {
 		ADD_HOOK(VkDestroyFence, "vkDestroyFence()");
 		ADD_HOOK(VkDestroyDevice, "vkDestroyDevice()");
 		ADD_HOOK(VkDestroyInstance, "vkDestroyInstance()");
+
+		suspender.Resume();
 
 		// Enable detours
 		for (auto& execute : s_DetourExecutionList) {

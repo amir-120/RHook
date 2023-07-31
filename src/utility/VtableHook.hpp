@@ -24,13 +24,13 @@ namespace RHook {
         bool HookMethod(uint32_t index, Address newMethod);
 
         auto GetInstance() {
-            return m_vtablePtr;
+            return m_VtablePtr;
         }
 
         // Access to original methods.
         Address GetMethod(uint32_t index) {
-            if (index < m_vtableSize && m_oldVTable && m_newVTable) {
-                return m_oldVTable.As<Address*>()[index];
+            if (index < m_VtableSize && m_OldVTable && m_NewVTable) {
+                return m_OldVTable.As<Address*>()[index];
             }
             else {
                 return nullptr;
@@ -44,11 +44,11 @@ namespace RHook {
 
     private:
         std::vector<Address> m_rawData;
-        Address m_vtablePtr;
-        Address* m_newVTable;
-        Address m_oldVTable;
-        size_t m_vtableSize;
+        Address m_VtablePtr;
+        Address* m_NewVTable;
+        Address m_OldVTable;
+        size_t m_VtableSize;
 
-        size_t get_vtable_size(Address vtable);
+        size_t GetVTableSize(Address vtable);
     };
 }

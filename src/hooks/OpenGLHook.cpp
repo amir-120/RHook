@@ -1,5 +1,6 @@
 #include "OpenGLHook.hpp"
 
+#include "utility/Thread.hpp"
 #include "Log/Logging.hpp"
 
 namespace RHook {
@@ -33,9 +34,13 @@ namespace RHook {
 			return false;
 		}
 
+		ThreadSuspender suspender{};
+
 #define ADD_HOOK(SYMBOL) s_HookList[(size_t)HIdx::SYMBOL] = std::make_unique<FunctionHook>(real##SYMBOL##Fn, (uintptr_t)&OpenGLHook::SYMBOL, #SYMBOL"()");
 
 		ADD_HOOK(SwapBuffers)
+
+		suspender.Resume();
 
 		// Enable detours
 		for (auto& execute : s_DetourExecutionList) {

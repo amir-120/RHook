@@ -14,14 +14,16 @@ namespace RHook {
 	class Log
 	{
 	public:
+		static std::shared_ptr<spdlog::logger>& GetRHookLogger();
+		static std::shared_ptr<spdlog::logger>& GetUserLogger();
+	
+	private:
 		static void Init();
 
-		static std::shared_ptr<spdlog::logger>& GetRHookLogger() { return s_RHookLogger; }
-		static std::shared_ptr<spdlog::logger>& GetUserLogger() { return s_UserLogger; }
-	
 	private:
 		static std::shared_ptr<spdlog::logger> s_RHookLogger;
 		static std::shared_ptr<spdlog::logger> s_UserLogger;
+		static bool s_Inited;
 	};
 
 }

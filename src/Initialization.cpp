@@ -3,12 +3,9 @@
 #include <detours.h>
 
 namespace RHook {
-	bool IsHelperProcess() {
+	bool g_IsMSDetoursInitilized{ false };
+	
+	BOOL IsHelperProcess() {
 		return DetourIsHelperProcess();
-	}
-
-	void Init() {
-		RHook::Log::Init();
-		DetourRestoreAfterWith();
 	}
 }

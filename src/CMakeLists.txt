@@ -39,6 +39,12 @@ set(UTILITIES_SRC
     utility/SmartFunctionHook.hpp
     utility/PointerHook.cpp
     utility/PointerHook.hpp
+    utility/ProtectionOverride.cpp
+    utility/ProtectionOverride.hpp
+    utility/String.cpp
+    utility/String.hpp
+    utility/Thread.cpp
+    utility/Thread.hpp
     utility/VtableHook.cpp
     utility/VtableHook.hpp
     utility/Module.hpp
