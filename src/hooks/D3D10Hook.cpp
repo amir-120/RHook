@@ -1,7 +1,6 @@
-#include "D3D10Hook.hpp"
-#include "D3DDXGIVMTIndices.hpp"
+#include <RHook/hooks/D3D10Hook.hpp>
 
-#include "Log/Logging.hpp"
+#include <log/Logging.hpp>
 
 namespace RHook {
 	static D3D10Hook* g_D3D10Hook = nullptr;
@@ -16,7 +15,7 @@ namespace RHook {
 	}
 
 	bool D3D10Hook::Hook() {
-		RH_RHOOK_INFO("Hooking D3D10");
+		RHOOK_INFO("[D3D10 HOOK]Hooking D3D10");
 
 		g_D3D10Hook = this;
 
@@ -25,13 +24,13 @@ namespace RHook {
 		// Manually get D3D10CreateDeviceAndSwapChain export
 		const auto d3d10Module = LoadLibrary("d3d10.dll");
 		if (d3d10Module == nullptr) {
-			RH_RHOOK_ERROR("D3D10: Failed to load d3d10.dll.");
+			RHOOK_ERROR("D3D10: Failed to load d3d10.dll.");
 			return false;
 		}
 		auto d3d10CreateDevice = (decltype(D3D10CreateDevice)*)GetProcAddress(d3d10Module, "D3D10CreateDevice");
 
 		if (d3d10CreateDevice == nullptr) {
-			RH_RHOOK_ERROR("D3D10: Failed to get D3D10CreateDevuce() export.");
+			RHOOK_ERROR("D3D10: Failed to get D3D10CreateDevuce() export.");
 			return false;
 		}
 
@@ -39,12 +38,12 @@ namespace RHook {
 		//createDeviceFlags |= D3D10_CREATE_DEVICE_DEBUG;
 		if (auto hr = d3d10CreateDevice(nullptr, D3D10_DRIVER_TYPE_HARDWARE, nullptr,
 			createDeviceFlags, D3D10_SDK_VERSION, &pDevice); FAILED(hr)) {
-			RH_RHOOK_ERROR("D3D10: Failed to create device. ERROR: {:s}", WINCOM_ERROR(hr));
+			RHOOK_ERROR("D3D10: Failed to create device. ERROR: {:s}", WINCOM_ERROR(hr));
 			return false;
 		}
 
 		if (!HookDXGI(pDevice.Get())) {
-			RH_RHOOK_ERROR("D3D10: Failed to hook DXGI.");
+			RHOOK_ERROR("D3D10: Failed to hook DXGI.");
 			return false;
 		}
 

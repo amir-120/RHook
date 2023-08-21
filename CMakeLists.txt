@@ -1,14 +1,18 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.24)
 
 project(RHook)
 
+SET(CMAKE_CONFIGURATION_TYPES "Debug;Release")
+
+include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/dependencies/Detours/Detours/src)
-include_directories(${CMAKE_SOURCE_DIR}/dependencies/spdlog/include)
+include_directories(${CMAKE_SOURCE_DIR}/dependencies/fmt/include)
 include_directories(${CMAKE_SOURCE_DIR}/dependencies/libffi/libffi/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/dependencies/libffi/libffi/include)
 
 add_compile_options(/W0)
-add_compile_options(/MT)
+add_compile_options("$<$<CONFIG:Release>:/MT>")
+add_compile_options("$<$<CONFIG:Debug>:/MTd>")
 add_compile_options(/Ob1)
 
 # set output directories
@@ -24,6 +28,9 @@ foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${UOUTPUTCONFIG} ${CMAKE_BINARY_DIR}/lib/${OUTPUTCONFIG})
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${UOUTPUTCONFIG} ${CMAKE_BINARY_DIR}/lib/${OUTPUTCONFIG})
 endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
+
+# store the root directory for the project
+set(INCLUDE_HEADERS_DIR ${CMAKE_CURRENT_LIST_DIR}/include)
 
 add_subdirectory(dependencies)
 add_subdirectory(src)

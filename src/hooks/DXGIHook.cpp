@@ -1,9 +1,9 @@
-#include "DXGIHook.hpp"
+#include <RHook/hooks/DXGIHook.hpp>
 
-#include "D3DDXGIVMTIndices.hpp"
+#include <RHook/hooks/D3DDXGIVMTIndices.hpp>
 
-#include "Log/Logging.hpp"
-#include "utility/Thread.hpp"
+#include <log/Logging.hpp>
+#include <RHook/utility/Thread.hpp>
 
 namespace RHook {
 	static DXGIHook* g_DXGIHook = nullptr;
@@ -18,7 +18,7 @@ namespace RHook {
 	}
 
 	bool DXGIHook::HookDXGI(IUnknown* pDevice) {
-		RH_RHOOK_INFO("Hooking DXGI");
+		RHOOK_INFO("[DXGI HOOK] Hooking DXGI");
 
 		g_DXGIHook = this;
 
@@ -38,36 +38,36 @@ namespace RHook {
 		// Manually get CreateDXGIFactory export because the user may be running Windows 7
 		const auto dxgiModule = LoadLibrary("dxgi.dll");
 		if (dxgiModule == nullptr) {
-			RH_RHOOK_ERROR("[DXGI HOOK] Failed to load dxgi.dll");
+			RHOOK_ERROR("[DXGI HOOK] Failed to load dxgi.dll");
 			return false;
 		}
 
 		auto realCreateDXGIFactoryFn = (decltype(CreateDXGIFactory)*)GetProcAddress(dxgiModule, "CreateDXGIFactory");
 
 		if (realCreateDXGIFactoryFn == nullptr) {
-			RH_RHOOK_ERROR("[DXGI HOOK] Failed to get CreateDXGIFactory export.");
+			RHOOK_ERROR("[DXGI HOOK] Failed to get CreateDXGIFactory export.");
 			return false;
 		}
 
-		RH_RHOOK_INFO("[DXGI HOOK] Creating Dummy DXGI Factory.");
+		RHOOK_INFO("[DXGI HOOK] Creating Dummy DXGI Factory.");
 
 		if (auto hr = realCreateDXGIFactoryFn(IID_PPV_ARGS(&m_PDXGIFactory)); FAILED(hr)) {
-			RH_RHOOK_ERROR("[DXGI HOOK] Failed to create Dummy DXGI Factory. ERROR: {:s}", WINCOM_ERROR(hr));
+			RHOOK_ERROR("[DXGI HOOK] Failed to create Dummy DXGI Factory. ERROR: {:s}", WINCOM_ERROR(hr));
 			return false;
 		}
 
-		RH_RHOOK_INFO("[DXGI HOOK] Creating Dummy SwapChain");
+		RHOOK_INFO("[DXGI HOOK] Creating Dummy SwapChain");
 
 		if (auto hr = m_PDXGIFactory->CreateSwapChainForComposition(pDevice, &swapChainDesc1, NULL,
 			&m_PSwapChain); FAILED(hr)) {
-			RH_RHOOK_ERROR("[DXGI HOOK] Failed to create Dummy DXGI SwapChain. ERROR: {:s}", WINCOM_ERROR(hr));
+			RHOOK_ERROR("[DXGI HOOK] Failed to create Dummy DXGI SwapChain. ERROR: {:s}", WINCOM_ERROR(hr));
 			return false;
 		}
 
-		//RH_RHOOK_INFO("[DXGI HOOK] Querying Dummy SwapChain");
+		//RHOOK_INFO("[DXGI HOOK] Querying Dummy SwapChain");
 		//
 		//if (auto hr = swapChain1->QueryInterface(IID_PPV_ARGS(&swapChain)); FAILED(hr)) {
-		//	RH_RHOOK_ERROR("[DXGI HOOK] Failed to retrieve DXGI SwapChain. ERROR: {:s}", WINCOM_ERROR(hr));
+		//	RHOOK_ERROR("[DXGI HOOK] Failed to retrieve DXGI SwapChain. ERROR: {:s}", WINCOM_ERROR(hr));
 		//	return false;
 		//}
 
@@ -77,13 +77,11 @@ namespace RHook {
 
 		ThreadSuspender suspender{};
 
-#define ADD_HOOK(SYMBOL) s_HookList[(size_t)HIdx::SYMBOL] = std::make_unique<FunctionHook>(real##SYMBOL##Fn, (uintptr_t)&DXGIHook::SYMBOL, #SYMBOL"()");
+#define ADD_HOOK(SYMBOL) s_HookList[(size_t)HIdx::SYMBOL] = std::make_unique<Detour_t>(real##SYMBOL##Fn, (uintptr_t)&DXGIHook::SYMBOL, 0, #SYMBOL"()");
 
 		ADD_HOOK(Present)
 		ADD_HOOK(ResizeBuffers)
 		ADD_HOOK(ResizeTarget)
-
-		suspender.Resume();
 
 		// Enable detours
 		for (auto& execute : s_DetourExecutionList) {
@@ -98,7 +96,7 @@ namespace RHook {
 				m_ActiveHookList[i] = s_HookList[i].get();
 			}
 			else {
-				RH_RHOOK_ERROR("[DXGI HOOK] Failed to hook {:s}", s_HookList[i]->GetName());
+				RHOOK_ERROR("[DXGI HOOK] Failed to hook {:s}", s_HookList[i]->GetName());
 				s_IsDXGIHooked = false;
 			}
 		}
@@ -117,6 +115,8 @@ namespace RHook {
 			return false;
 		}
 
+		suspender.Resume();
+
 		return s_IsDXGIHooked;
 	}
 
@@ -126,7 +126,7 @@ namespace RHook {
 		bool unhooked = true;
 
 		for (auto& hook : s_HookList) {
-			if (hook) unhooked = unhooked && hook->Remove();
+			if (hook) unhooked = unhooked && hook->Unhook();
 		}
 
 		if (unhooked) {
@@ -165,8 +165,8 @@ namespace RHook {
 				  auto&	pResult = *(decltype(RESULT)**)&s_ResultList[(size_t)HIdx::SYMBOL];													\
 																																			\
 			/*This line must be called before calling our detour function because we might have to unhook the function inside our detour.	\
-			*/auto originalFn = hook->GetOriginal<decltype(DXGIHook::SYMBOL)>();															\
-			auto realFn = hook->GetTarget<decltype(DXGIHook::SYMBOL)>();																	\
+			*/auto originalFn = hook->GetTrampoline<decltype(DXGIHook::SYMBOL)*>();															\
+			auto realFn = hook->GetTarget<decltype(DXGIHook::SYMBOL)*>();																	\
 																																			\
 			if (g_DXGIHook != nullptr && executeDetour && callDepth == 0) {																	\
 				static SYMBOL##Parameters_t tmpParams = { __VA_ARGS__ };																	\

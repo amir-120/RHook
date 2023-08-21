@@ -3,8 +3,8 @@
 #include <Windows.h>
 #include <TlHelp32.h>
 
-#include "Log/Logging.hpp"
-#include "Thread.hpp"
+#include <Log/Logging.hpp>
+#include <RHook/utility/Thread.hpp>
 
 namespace RHook {
 	namespace detail {
@@ -38,7 +38,7 @@ namespace RHook {
 				if (threadHandle != nullptr && snapshotHandle != INVALID_HANDLE_VALUE) {
 					auto state = std::make_unique<ThreadState>();
 
-					RH_RHOOK_INFO("[THREAD] Suspending {}", (uint32_t)te.th32ThreadID);
+					RHOOK_INFO("[THREAD] Suspending {}", (uint32_t)te.th32ThreadID);
 
 					state->threadID = te.th32ThreadID;
 					state->suspended = SuspendThread(threadHandle) > 0;
@@ -58,7 +58,7 @@ namespace RHook {
 			auto threadHandle = OpenThread(THREAD_SUSPEND_RESUME, FALSE, state->threadID);
 
 			if (threadHandle != nullptr) {
-				RH_RHOOK_INFO("[THREAD] Resuming {}", state->threadID);
+				RHOOK_INFO("[THREAD] Resuming {}", state->threadID);
 
 				ResumeThread(threadHandle);
 				CloseHandle(threadHandle);

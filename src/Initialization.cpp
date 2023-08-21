@@ -1,10 +1,10 @@
-#include "Include/RenderHook.hpp"
-#include "Log/Logging.hpp"
+#include <RHook/RenderHook.hpp>
+#include <Log/Logging.hpp>
 #include <detours.h>
 
+bool g_IsMSDetoursInitialized{ false };
+
 namespace RHook {
-	bool g_IsMSDetoursInitilized{ false };
-	
 	BOOL IsHelperProcess() {
 		return DetourIsHelperProcess();
 	}

@@ -1,4 +1,4 @@
-#include "VtableHook.hpp"
+#include <RHook/utility/VtableHook.hpp>
 
 namespace RHook {
     VtableHook::VtableHook()

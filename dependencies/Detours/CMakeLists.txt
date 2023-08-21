@@ -1,5 +1,6 @@
-set(DETOURS_SOURCE Detours/src)
 project(Detours)
+
+set(DETOURS_SOURCE Detours/src)
 add_library(Detours STATIC
              ${DETOURS_SOURCE}/creatwth.cpp
              ${DETOURS_SOURCE}/detours.cpp

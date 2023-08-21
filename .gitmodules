@@ -1,9 +1,9 @@
 [submodule "dependencies/Detours/Detours"]
 	path = dependencies/Detours/Detours
 	url = https://github.com/microsoft/Detours.git
+[submodule "dependencies/fmt"]
+	path = dependencies/fmt
+	url = https://github.com/fmtlib/fmt.git
 [submodule "dependencies/libffi/libffi"]
 	path = dependencies/libffi/libffi
 	url = https://github.com/libffi/libffi.git
-[submodule "dependencies/spdlog"]
-	path = dependencies/spdlog
-	url = https://github.com/gabime/spdlog.git

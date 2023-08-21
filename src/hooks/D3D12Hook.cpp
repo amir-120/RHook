@@ -1,7 +1,7 @@
-#include "D3D12Hook.hpp"
-#include "D3DDXGIVMTIndices.hpp"
+#include <RHook/hooks/D3D12Hook.hpp>
+#include <RHook/hooks/D3DDXGIVMTIndices.hpp>
 
-#include "Log/Logging.hpp"
+#include <log/Logging.hpp>
 
 namespace RHook {
     static D3D12Hook* g_D3D12Hook = nullptr;
@@ -16,7 +16,7 @@ namespace RHook {
     }
 
     bool D3D12Hook::Hook() {
-        RH_RHOOK_INFO("Hooking D3D12");
+        RHOOK_INFO("[D3D12 HOOK] Hooking D3D12");
 
         g_D3D12Hook = this;
 
@@ -27,42 +27,42 @@ namespace RHook {
         // Manually get D3D12CreateDevice export because the user may be running Windows 7
         const auto d3d12Module = LoadLibrary("d3d12.dll");
         if (d3d12Module == nullptr) {
-            RH_RHOOK_ERROR("D3D12: Failed to load d3d12.dll.");
+            RHOOK_ERROR("D3D12: Failed to load d3d12.dll.");
             return false;
         }
         auto d3d12CreateDevice = (decltype(D3D12CreateDevice)*)GetProcAddress(d3d12Module, "D3D12CreateDevice");
 
         if (d3d12CreateDevice == nullptr) {
-            RH_RHOOK_ERROR("D3D12: Failed to get D3D12CreateDevice export.");
+            RHOOK_ERROR("D3D12: Failed to get D3D12CreateDevice export.");
             return false;
         }
 
-        RH_RHOOK_INFO("D3D12: Creating Dummy Device");
+        RHOOK_INFO("D3D12: Creating Dummy Device");
 
         if (auto hr = d3d12CreateDevice(nullptr, featureLevel, IID_PPV_ARGS(&pDevice)); FAILED(hr)) {
-            RH_RHOOK_ERROR("D3D12: Failed to create Dummy Device. ERROR: {:s}", WINCOM_ERROR(hr));
+            RHOOK_ERROR("D3D12: Failed to create Dummy Device. ERROR: {:s}", WINCOM_ERROR(hr));
             return false;
         }
 
         // Manually get CreateDXGIFactory export because the user may be running Windows 7
         const auto dxgiModule = LoadLibrary("dxgi.dll");
         if (dxgiModule == nullptr) {
-            RH_RHOOK_ERROR("D3D12: Failed to load dxgi.dll");
+            RHOOK_ERROR("D3D12: Failed to load dxgi.dll");
             return false;
         }
 
         auto createDXGIFactory = (decltype(CreateDXGIFactory)*)GetProcAddress(dxgiModule, "CreateDXGIFactory");
 
         if (createDXGIFactory == nullptr) {
-            RH_RHOOK_ERROR("D3D12: Failed to get CreateDXGIFactory export.");
+            RHOOK_ERROR("D3D12: Failed to get CreateDXGIFactory export.");
             return false;
         }
 
-        RH_RHOOK_INFO("D3D12: Creating Dummy DXGI Factory.");
+        RHOOK_INFO("D3D12: Creating Dummy DXGI Factory.");
 
         ComPtr<IDXGIFactory4> pFactory{};
         if (auto hr = createDXGIFactory(IID_PPV_ARGS(&pFactory)); FAILED(hr)) {
-            RH_RHOOK_ERROR("D3D12: Failed to create Dummy DXGI Factory. ERROR: {:s}", WINCOM_ERROR(hr));
+            RHOOK_ERROR("D3D12: Failed to create Dummy DXGI Factory. ERROR: {:s}", WINCOM_ERROR(hr));
             return false;
         }
 
@@ -72,22 +72,22 @@ namespace RHook {
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
         queueDesc.NodeMask = 0;
 
-        RH_RHOOK_INFO("D3D12: Creating Dummy CommandQueue.");
+        RHOOK_INFO("D3D12: Creating Dummy CommandQueue.");
 
         ComPtr<ID3D12CommandQueue> pCommandQueue{};
         if (auto hr = pDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&pCommandQueue)); FAILED(hr)) {
-            RH_RHOOK_ERROR("D3D12: Failed to create Dummy CommandQueue. ERROR: {:s}", WINCOM_ERROR(hr));
+            RHOOK_ERROR("D3D12: Failed to create Dummy CommandQueue. ERROR: {:s}", WINCOM_ERROR(hr));
             return false;
         }
 
         if (!HookDXGI(pCommandQueue.Get())) {
-            RH_RHOOK_ERROR("D3D12: Failed to hook DXGI.");
+            RHOOK_ERROR("D3D12: Failed to hook DXGI.");
             return false;
         }
 
         const auto pSwapChain = m_PSwapChain.Get();
 
-        RH_RHOOK_INFO("D3D12: Finding CommandQueue offset.");
+        RHOOK_INFO("D3D12: Finding CommandQueue offset.");
 
         // Find the command queue offset in the swapchain
         //m_commandQueueOffset = (uintptr_t)std::find((uintptr_t*)swapChain, (uintptr_t*)((uintptr_t)swapChain + 512), (uintptr_t)commandQueue) - (uintptr_t)swapChain; //1 byte aigned search
@@ -95,7 +95,7 @@ namespace RHook {
         m_CommandQueueOffsetList.reserve(5);
 
         if (pSwapChain == nullptr) {
-            RH_RHOOK_ERROR("D3D12: Invalid dummy SwapChain.");
+            RHOOK_ERROR("D3D12: Invalid dummy SwapChain.");
             return false;
         }
 
@@ -111,7 +111,7 @@ namespace RHook {
 
             if (data == pCommandQueue.Get()) {
                 m_CommandQueueOffsetList.push_back(i);
-                RH_RHOOK_INFO("D3D12: Found CommandQueue offset: {:x}", i);
+                RHOOK_INFO("D3D12: Found CommandQueue offset: {:x}", i);
             }
         }
 
@@ -146,8 +146,8 @@ namespace RHook {
                         m_CommandQueueOffsetList.push_back(i);
                         m_ProtonSwapchainOffset = base;
 
-                        RH_RHOOK_INFO("D3D12: Proton potentially detected.");
-                        RH_RHOOK_INFO("D3D12: Found command queue offset: {:x}", i);
+                        RHOOK_INFO("D3D12: Proton potentially detected.");
+                        RHOOK_INFO("D3D12: Found command queue offset: {:x}", i);
                     }
                 }
 
@@ -195,7 +195,7 @@ namespace RHook {
                             if (const auto cmdQueueTmp = *(ID3D12CommandQueue**)(realSwapChain + cmdQueueOffset); !IsBadReadPtr(cmdQueueTmp, sizeof(cmdQueueTmp)))
                             {
                                 d3d12->m_CommandQueueOffset = cmdQueueOffset;
-                                RH_RHOOK_INFO("D3D12: Using Proton CommandQueue offset: {:x}", d3d12->m_CommandQueueOffset);
+                                RHOOK_INFO("D3D12: Using Proton CommandQueue offset: {:x}", d3d12->m_CommandQueueOffset);
 
                                 break;
                             }
@@ -210,7 +210,7 @@ namespace RHook {
                             if (const auto cmdQueueTmp = *(ID3D12CommandQueue**)((uintptr_t)swapChain + cmdQueueOffset); !IsBadReadPtr(cmdQueueTmp, sizeof(cmdQueueTmp)))
                             {
                                 d3d12->m_CommandQueueOffset = cmdQueueOffset;
-                                RH_RHOOK_INFO("D3D12: Using CommandQueue offset: {:x}", d3d12->m_CommandQueueOffset);
+                                RHOOK_INFO("D3D12: Using CommandQueue offset: {:x}", d3d12->m_CommandQueueOffset);
 
                                 break;
                             }

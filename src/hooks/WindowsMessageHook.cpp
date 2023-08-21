@@ -1,6 +1,8 @@
-#include "WindowsMessageHook.hpp"
+#include <RHook/hooks/WindowsMessageHook.hpp>
 
-#include "Log/Logging.hpp"
+#include <log/Logging.hpp>
+
+#include <mutex>
 
 namespace RHook {
     using namespace std;
@@ -58,7 +60,7 @@ namespace RHook {
     WindowsMessageHook::WindowsMessageHook(HWND hWnd)
         : m_hWnd{ hWnd }
     {
-        RH_RHOOK_INFO("[WINDOWS MESSAGE HOOK] Initializing WindowsMessageHook!");
+        RHOOK_INFO("[WINDOWS MESSAGE HOOK] Initializing WindowsMessageHook!");
 
         g_WindowsMessageHook = this;
 
@@ -68,7 +70,7 @@ namespace RHook {
         // Set it to our "hook" procedure.
         SetWindowLongPtr(m_hWnd, GWLP_WNDPROC, (LONG_PTR)&WindowProc);
 
-        RH_RHOOK_INFO("[WINDOWS MESSAGE HOOK] Hooked Windows message handler!");
+        RHOOK_INFO("[WINDOWS MESSAGE HOOK] Hooked Windows message handler!");
     }
 
     WindowsMessageHook::~WindowsMessageHook() {

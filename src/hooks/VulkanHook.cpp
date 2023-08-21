@@ -1,7 +1,7 @@
-#include "VulkanHook.hpp"
+#include <RHook/hooks/VulkanHook.hpp>
 
-#include "utility/Thread.hpp"
-#include "Log/Logging.hpp"
+#include <RHook/utility/Thread.hpp>
+#include <log/Logging.hpp>
 
 namespace RHook {
 	static VulkanHook* g_VulkanHook = nullptr;
@@ -18,123 +18,123 @@ namespace RHook {
 
 	bool VulkanHook::Hook()
 	{
-		RH_RHOOK_INFO("Hooking Vulkan");
+		RHOOK_INFO("[VULKAN HOOK] Hooking Vulkan");
 
 		g_VulkanHook = this;
 
 		auto vulkanModule = GetModuleHandleA("vulkan-1.dll");
 		if (!vulkanModule) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vulkan-1.dll.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vulkan-1.dll.");
 			return false;
 		}
 
 		// Loader exports
 		auto realVkGetDeviceProcAddrFn = (decltype(vkGetDeviceProcAddr)*)GetProcAddress(vulkanModule, "vkGetDeviceProcAddr");
 		if (realVkGetDeviceProcAddrFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkGetDeviceProcAddr() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkGetDeviceProcAddr() export.");
 			return false;
 		}
 
 		auto realVkGetInstanceProcAddrFn = (decltype(vkGetInstanceProcAddr)*)GetProcAddress(vulkanModule, "vkGetInstanceProcAddr");
 		if (realVkGetInstanceProcAddrFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkGetInstanceProcAddr() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkGetInstanceProcAddr() export.");
 			return false;
 		}
 
 		// Global proc addresses
 		auto realVkCreateInstanceFn = (decltype(vkCreateInstance)*)GetProcAddress(vulkanModule, "vkCreateInstance");
 		if (realVkCreateInstanceFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateInstance() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateInstance() export.");
 			return false;
 		}
 
 		auto realVkCreateDeviceFn = (decltype(vkCreateDevice)*)GetProcAddress(vulkanModule, "vkCreateDevice");
 		if (realVkCreateDeviceFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateDevice() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateDevice() export.");
 			return false;
 		}
 
 		auto realVkCreateFenceFn = (decltype(vkCreateFence)*)GetProcAddress(vulkanModule, "vkCreateFence");
 		if (realVkCreateFenceFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateFence() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateFence() export.");
 			return false;
 		}
 
 		auto realVkCreateSemaphoreFn = (decltype(vkCreateSemaphore)*)GetProcAddress(vulkanModule, "vkCreateSemaphore");
 		if (realVkCreateSemaphoreFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateSemaphore() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateSemaphore() export.");
 			return false;
 		}
 
 		auto realVkCreateEventFn = (decltype(vkCreateEvent)*)GetProcAddress(vulkanModule, "vkCreateEvent");
 		if (realVkCreateEventFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateEvent() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateEvent() export.");
 			return false;
 		}
 
 		auto realVkCreateQueryPoolFn = (decltype(vkCreateQueryPool)*)GetProcAddress(vulkanModule, "vkCreateQueryPool");
 		if (realVkCreateQueryPoolFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateQueryPool() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateQueryPool() export.");
 			return false;
 		}
 
 		auto realVkCreateBufferFn = (decltype(vkCreateBuffer)*)GetProcAddress(vulkanModule, "vkCreateBuffer");
 		if (realVkCreateBufferFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateBuffer() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateBuffer() export.");
 			return false;
 		}
 
 		auto realVkCreateBufferViewFn = (decltype(vkCreateBufferView)*)GetProcAddress(vulkanModule, "vkCreateBufferView");
 		if (realVkCreateBufferViewFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateBufferView() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateBufferView() export.");
 			return false;
 		}
 
 		auto realVkCreateImageFn = (decltype(vkCreateImage)*)GetProcAddress(vulkanModule, "vkCreateImage");
 		if (realVkCreateImageFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateImage() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateImage() export.");
 			return false;
 		}
 
 		auto realVkCreateImageViewFn = (decltype(vkCreateImageView)*)GetProcAddress(vulkanModule, "vkCreateImageView");
 		if (realVkCreateImageViewFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateImageView() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateImageView() export.");
 			return false;
 		}
 
 		auto realVkCreateGraphicsPipelinesFn = (decltype(vkCreateGraphicsPipelines)*)GetProcAddress(vulkanModule, "vkCreateGraphicsPipelines");
 		if (realVkCreateGraphicsPipelinesFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateGraphicsPipelines() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateGraphicsPipelines() export.");
 			return false;
 		}
 
 		auto realVkCreateFramebufferFn = (decltype(vkCreateFramebuffer)*)GetProcAddress(vulkanModule, "vkCreateFramebuffer");
 		if (realVkCreateFramebufferFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateFramebuffer() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateFramebuffer() export.");
 			return false;
 		}
 
 		auto realVkCreateDescriptorPoolFn = (decltype(vkCreateDescriptorPool)*)GetProcAddress(vulkanModule, "vkCreateDescriptorPool");
 		if (realVkCreateDescriptorPoolFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateDescriptorPool() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateDescriptorPool() export.");
 			return false;
 		}
 
 		auto realVkCreateWin32SurfaceKHRFn = (decltype(vkCreateWin32SurfaceKHR)*)GetProcAddress(vulkanModule, "vkCreateWin32SurfaceKHR");
 		if (realVkCreateWin32SurfaceKHRFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateWin32SurfaceKHR() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateWin32SurfaceKHR() export.");
 			return false;
 		}
 
 		auto realVkCreateSwapchainKHRFn = (decltype(vkCreateSwapchainKHR)*)GetProcAddress(vulkanModule, "vkCreateSwapchainKHR");
 		if (realVkCreateSwapchainKHRFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateSwapchainKHR() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateSwapchainKHR() export.");
 			return false;
 		}
 
 		auto realVkCreateRenderPassFn = (decltype(vkCreateRenderPass)*)GetProcAddress(vulkanModule, "vkCreateRenderPass");
 		if (realVkCreateRenderPassFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateRenderPass() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCreateRenderPass() export.");
 			return false;
 		}
 
@@ -142,19 +142,19 @@ namespace RHook {
 
 		auto realVkAllocateCommandBuffersFn = (decltype(vkAllocateCommandBuffers)*)GetProcAddress(vulkanModule, "vkAllocateCommandBuffers");
 		if (realVkAllocateCommandBuffersFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkAllocateCommandBuffers() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkAllocateCommandBuffers() export.");
 			return false;
 		}
 
 		auto realVkBeginCommandBufferFn = (decltype(vkBeginCommandBuffer)*)GetProcAddress(vulkanModule, "vkBeginCommandBuffer");
 		if (realVkBeginCommandBufferFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkBeginCommandBuffer() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkBeginCommandBuffer() export.");
 			return false;
 		}
 
 		auto realVkCmdBeginRenderPassFn = (decltype(vkCmdBeginRenderPass)*)GetProcAddress(vulkanModule, "vkCmdBeginRenderPass");
 		if (realVkCmdBeginRenderPassFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCmdBeginRenderPass() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCmdBeginRenderPass() export.");
 			return false;
 		}
 
@@ -162,25 +162,25 @@ namespace RHook {
 
 		auto realVkGetDeviceQueueFn = (decltype(vkGetDeviceQueue)*)GetProcAddress(vulkanModule, "vkGetDeviceQueue");
 		if (realVkGetDeviceQueueFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkGetDeviceQueue() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkGetDeviceQueue() export.");
 			return false;
 		}
 
 		auto realVkAcquireNextImageKHRFn = (decltype(vkAcquireNextImageKHR)*)GetProcAddress(vulkanModule, "vkAcquireNextImageKHR");
 		if (realVkAcquireNextImageKHRFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkAcquireNextImageKHR() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkAcquireNextImageKHR() export.");
 			return false;
 		}
 
 		auto realVkQueueSubmitFn = (decltype(vkQueueSubmit)*)GetProcAddress(vulkanModule, "vkQueueSubmit");
 		if (realVkQueueSubmitFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkQueueSubmit() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkQueueSubmit() export.");
 			return false;
 		}
 
 		auto realVkQueuePresentKHRFn = (decltype(vkQueuePresentKHR)*)GetProcAddress(vulkanModule, "vkQueuePresentKHR");
 		if (realVkQueuePresentKHRFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkQueuePresentKHR() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkQueuePresentKHR() export.");
 			return false;
 		}
 
@@ -188,19 +188,19 @@ namespace RHook {
 		
 		auto realVkCmdEndRenderPassFn = (decltype(vkCmdEndRenderPass)*)GetProcAddress(vulkanModule, "vkCmdEndRenderPass");
 		if (realVkCmdEndRenderPassFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCmdEndRenderPass() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkCmdEndRenderPass() export.");
 			return false;
 		}
 
 		auto realVkEndCommandBufferFn = (decltype(vkEndCommandBuffer)*)GetProcAddress(vulkanModule, "vkEndCommandBuffer");
 		if (realVkEndCommandBufferFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkEndCommandBuffer() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkEndCommandBuffer() export.");
 			return false;
 		}
 
 		auto realVkFreeCommandBuffersFn = (decltype(vkFreeCommandBuffers)*)GetProcAddress(vulkanModule, "vkFreeCommandBuffers");
 		if (realVkFreeCommandBuffersFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkFreeCommandBuffers() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkFreeCommandBuffers() export.");
 			return false;
 		}
 
@@ -208,97 +208,97 @@ namespace RHook {
 
 		auto realVkDestroyRenderPassFn = (decltype(vkDestroyRenderPass)*)GetProcAddress(vulkanModule, "vkDestroyRenderPass");
 		if (realVkDestroyRenderPassFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyRenderPass() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyRenderPass() export.");
 			return false;
 		}
 
 		auto realVkDestroySwapchainKHRFn = (decltype(vkDestroySwapchainKHR)*)GetProcAddress(vulkanModule, "vkDestroySwapchainKHR");
 		if (realVkDestroySwapchainKHRFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroySwapchainKHR() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroySwapchainKHR() export.");
 			return false;
 		}
 
 		auto realVkDestroySurfaceKHRFn = (decltype(vkDestroySurfaceKHR)*)GetProcAddress(vulkanModule, "vkDestroySurfaceKHR");
 		if (realVkDestroySurfaceKHRFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroySurfaceKHR() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroySurfaceKHR() export.");
 			return false;
 		}
 
 		auto realVkDestroyDescriptorPoolFn = (decltype(vkDestroyDescriptorPool)*)GetProcAddress(vulkanModule, "vkDestroyDescriptorPool");
 		if (realVkDestroyDescriptorPoolFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyDescriptorPool() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyDescriptorPool() export.");
 			return false;
 		}
 
 		auto realVkDestroyFramebufferFn = (decltype(vkDestroyFramebuffer)*)GetProcAddress(vulkanModule, "vkDestroyFramebuffer");
 		if (realVkDestroyFramebufferFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyFramebuffer() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyFramebuffer() export.");
 			return false;
 		}
 
 		auto realVkDestroyPipelineFn = (decltype(vkDestroyPipeline)*)GetProcAddress(vulkanModule, "vkDestroyPipeline");
 		if (realVkDestroyPipelineFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyPipeline() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyPipeline() export.");
 			return false;
 		}
 
 		auto realVkDestroyImageViewFn = (decltype(vkDestroyImageView)*)GetProcAddress(vulkanModule, "vkDestroyImageView");
 		if (realVkDestroyImageViewFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyImageView() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyImageView() export.");
 			return false;
 		}
 
 		auto realVkDestroyImageFn = (decltype(vkDestroyImage)*)GetProcAddress(vulkanModule, "vkDestroyImage");
 		if (realVkDestroyImageFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyImage() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyImage() export.");
 			return false;
 		}
 
 		auto realVkDestroyBufferViewFn = (decltype(vkDestroyBufferView)*)GetProcAddress(vulkanModule, "vkDestroyBufferView");
 		if (realVkDestroyBufferViewFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyBufferView() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyBufferView() export.");
 			return false;
 		}
 
 		auto realVkDestroyBufferFn = (decltype(vkDestroyBuffer)*)GetProcAddress(vulkanModule, "vkDestroyBuffer");
 		if (realVkDestroyBufferFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyBuffer() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyBuffer() export.");
 			return false;
 		}
 
 		auto realVkDestroyQueryPoolFn = (decltype(vkDestroyQueryPool)*)GetProcAddress(vulkanModule, "vkDestroyQueryPool");
 		if (realVkDestroyQueryPoolFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyQueryPool() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyQueryPool() export.");
 			return false;
 		}
 
 		auto realVkDestroyEventFn = (decltype(vkDestroyEvent)*)GetProcAddress(vulkanModule, "vkDestroyEvent");
 		if (realVkDestroyEventFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyEvent() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyEvent() export.");
 			return false;
 		}
 
 		auto realVkDestroySemaphoreFn = (decltype(vkDestroySemaphore)*)GetProcAddress(vulkanModule, "vkDestroySemaphore");
 		if (realVkDestroySemaphoreFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroySemaphore() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroySemaphore() export.");
 			return false;
 		}
 
 		auto realVkDestroyFenceFn = (decltype(vkDestroyFence)*)GetProcAddress(vulkanModule, "vkDestroyFence");
 		if (realVkDestroyFenceFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyFence() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyFence() export.");
 			return false;
 		}
 
 		auto realVkDestroyDeviceFn = (decltype(vkDestroyDevice)*)GetProcAddress(vulkanModule, "vkDestroyDevice");
 		if (realVkDestroyDeviceFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyDevice() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyDevice() export.");
 			return false;
 		}
 
 		auto realVkDestroyInstanceFn = (decltype(vkDestroyInstance)*)GetProcAddress(vulkanModule, "vkDestroyInstance");
 		if (realVkDestroyInstanceFn == nullptr) {
-			RH_RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyInstance() export.");
+			RHOOK_ERROR("[VULKAN HOOK] Failed to load vkDestroyInstance() export.");
 			return false;
 		}
 
@@ -358,8 +358,6 @@ namespace RHook {
 		ADD_HOOK(VkDestroyDevice, "vkDestroyDevice()");
 		ADD_HOOK(VkDestroyInstance, "vkDestroyInstance()");
 
-		suspender.Resume();
-
 		// Enable detours
 		for (auto& execute : s_DetourExecutionList) {
 			execute = true;
@@ -371,7 +369,7 @@ namespace RHook {
 		for (size_t i = 0; i < s_HookList.size(); i++) {
 			if (!s_HookList[i]->Create())
 			{
-				RH_RHOOK_ERROR("[VULKAN HOOK] Failed to hook {:s}", s_HookList[i]->GetName());
+				RHOOK_ERROR("[VULKAN HOOK] Failed to hook {:s}", s_HookList[i]->GetName());
 				s_Hooked = false;
 			}
 		}
@@ -391,6 +389,8 @@ namespace RHook {
 
 			return false;
 		}
+
+		suspender.Resume();
 
 		return s_Hooked;
 	}
@@ -428,9 +428,9 @@ namespace RHook {
 			const auto& hook = g_VulkanHook->m_ActiveHookList[(uint64_t)HIdx::SYMBOL];														\
 				  auto&	pResult = *(decltype(RESULT)**)&s_ResultList[(size_t)HIdx::SYMBOL];													\
 																																			\
-			/*This line must be called before calling our detour function because we might have to unhook the function inside our detour.	\
-			*/auto originalFn = hook->GetOriginal<decltype(VulkanHook::SYMBOL)>();															\
-			auto realFn = hook->GetTarget<decltype(VulkanHook::SYMBOL)>();																	\
+			/*This line must be called before calling our detour function because we might have to unhook the function inside our detour.*/	\
+			auto originalFn = hook->GetTrampoline<decltype(VulkanHook::SYMBOL)*>();															\
+			auto realFn = hook->GetTrampoline<decltype(VulkanHook::SYMBOL)*>();																\
 																																			\
 			if (callDepth == 0) {																											\
 				pResult = &RESULT;																											\
@@ -454,9 +454,9 @@ namespace RHook {
 			auto& callDepth = g_VKCallDepth##NAME;																							\
 			const auto& hook = g_VulkanHook->m_ActiveHookList[(uint64_t)HIdx::NAME];														\
 																																			\
-			/*This line must be called before calling our detour function because we might have to unhook the function inside our detour.	\
-			*/auto originalFn = hook->GetOriginal<decltype(VulkanHook::NAME)>(); 															\
-			auto realFn = hook->GetTarget<decltype(VulkanHook::NAME)>();;																	\
+			/*This line must be called before calling our detour function because we might have to unhook the function inside our detour.*/	\
+			auto originalFn = hook->GetTrampoline<decltype(VulkanHook::NAME)*>(); 															\
+			auto realFn = hook->GetTrampoline<decltype(VulkanHook::NAME)*>();;																\
 																																			\
 			callDepth++; 																													\
 																																			\
@@ -477,9 +477,9 @@ namespace RHook {
 				  auto&	pParams = *(SYMBOL##Parameters_t**)&s_ParamList[(size_t)HIdx::SYMBOL];												\
 				  auto&	pResult = *(decltype(RESULT)**)&s_ResultList[(size_t)HIdx::SYMBOL];													\
 																																			\
-			/*This line must be called before calling our detour function because we might have to unhook the function inside our detour.	\
-			*/auto originalFn = hook->GetOriginal<decltype(VulkanHook::SYMBOL)>();															\
-			auto realFn = hook->GetTarget<decltype(VulkanHook::SYMBOL)>();																	\
+			/*This line must be called before calling our detour function because we might have to unhook the function inside our detour.*/	\
+			auto originalFn = hook->GetTrampoline<decltype(VulkanHook::SYMBOL)*>();															\
+			auto realFn = hook->GetTarget<decltype(VulkanHook::SYMBOL)*>();																	\
 																																			\
 			if (g_VulkanHook != nullptr && executeDetour && callDepth == 0) {																\
 				static SYMBOL##Parameters_t tmpParams = { __VA_ARGS__ };																	\
@@ -521,14 +521,14 @@ namespace RHook {
 			const auto& postDetourFn = g_VulkanHook->m_OnPostFunctionCallList[(size_t)HIdx::SYMBOL];										\
 				  auto&	pParams = *(SYMBOL##Parameters_t**)&s_ParamList[(size_t)HIdx::SYMBOL];												\
 																																			\
-			/*This line must be called before calling our detour function because we might have to unhook the function inside our detour.	\
-			*/auto originalFn = hook->GetOriginal<decltype(VulkanHook::SYMBOL)>(); 															\
-			auto realFn = hook->GetTarget<decltype(VulkanHook::SYMBOL)>();																	\
+			/*This line must be called before calling our detour function because we might have to unhook the function inside our detour.*/	\
+			auto originalFn = hook->GetTrampoline<decltype(VulkanHook::SYMBOL)*>(); 														\
+			auto realFn = hook->GetTarget<decltype(VulkanHook::SYMBOL)*>();																	\
 																																			\
 			if (g_VulkanHook != nullptr && executeDetour && callDepth == 0) {																\
 				static SYMBOL##Parameters_t tmpParams = { __VA_ARGS__ };																	\
 				tmpParams = { __VA_ARGS__ };																								\
-				pParams = &tmpParams;																											\
+				pParams = &tmpParams;																										\
 				VulkanHook::SkipDetours([&]() {																								\
 					if (preDetourFn) {																										\
 						preDetourFn(*g_VulkanHook);																							\
@@ -563,19 +563,19 @@ namespace RHook {
 		static PFN_vkVoidFunction result = NULL;
 		DETOUR_NOINSERT_RETURN(result, VkGetInstanceProcAddr, instance, pName);
 
-#define ADD_INSTANCE_ICD_COMMAND_HOOK(SYMBOL, NAME, LOGNAME) if (!strcmp(pName, NAME) && result != (decltype(result))g_VulkanHook->s_HookList[(size_t)HIdx::SYMBOL]->GetTarget()) {	\
-				s_InstanceCommandMap.Map(instance, NAME, (decltype(VulkanHook::SYMBOL)*)result, &g_VulkanHook->m_ActiveHookList[(size_t)HIdx::SYMBOL], &VulkanHook::SYMBOL);		\
-																																													\
-				const auto& commandHook = s_InstanceCommandMap.GetCommandHookFromInstanceHandle(instance, NAME);																	\
-				if (commandHook.has_value() && !commandHook.value().get()->IsValid()) {																								\
-					commandHook.value().get()->SetName("ICD - " LOGNAME);																											\
-					if (commandHook.value().get()->Create()) {																														\
-						RH_RHOOK_INFO("[VULKAN HOOK] Hooked ICD " LOGNAME " at {:p} for device: {:p}", (void*)result, (void*)instance);												\
-					}																																								\
-					else {																																							\
-						RH_RHOOK_ERROR("[VULKAN HOOK] Failed to hook " LOGNAME " at {:p} obtained from vkGetInstanceProcAddr(). Instance = {:p}", (void*)result, (void*)instance);	\
-					}																																								\
-				}																																									\
+#define ADD_INSTANCE_ICD_COMMAND_HOOK(SYMBOL, NAME, LOGNAME) if (!strcmp(pName, NAME) && result != (decltype(result))g_VulkanHook->s_HookList[(size_t)HIdx::SYMBOL]->GetTarget().As<PFN_vkVoidFunction>()) {	\
+				s_InstanceCommandMap.Map(instance, NAME, (decltype(VulkanHook::SYMBOL)*)result, &g_VulkanHook->m_ActiveHookList[(size_t)HIdx::SYMBOL], &VulkanHook::SYMBOL);									\
+																																																				\
+				const auto& commandHook = s_InstanceCommandMap.GetCommandHookFromInstanceHandle(instance, NAME);																								\
+				if (commandHook.has_value() && !commandHook.value().get()->IsValid()) {																															\
+					commandHook.value().get()->SetName("ICD - " LOGNAME);																																		\
+					if (commandHook.value().get()->Create()) {																																					\
+						RHOOK_INFO("[VULKAN HOOK] Hooked ICD " LOGNAME " at {:p} for device: {:p}", (void*)result, (void*)instance);																			\
+					}																																															\
+					else {																																														\
+						RHOOK_ERROR("[VULKAN HOOK] Failed to hook " LOGNAME " at {:p} obtained from vkGetInstanceProcAddr(). Instance = {:p}", (void*)result, (void*)instance);									\
+					}																																															\
+				}																																																\
 			}
 
 		if (result != NULL) {
@@ -595,19 +595,19 @@ namespace RHook {
 		static PFN_vkVoidFunction result = NULL;
 		DETOUR_NOINSERT_RETURN(result, VkGetDeviceProcAddr, device, pName);
 
-#define ADD_DEVICE_ICD_COMMAND_HOOK(SYMBOL, NAME, LOGNAME) if (!strcmp(pName, NAME) && result != (decltype(result))g_VulkanHook->s_HookList[(size_t)HIdx::SYMBOL]->GetTarget()) {	\
-				s_DeviceCommandMap.Map(device, NAME, (decltype(VulkanHook::SYMBOL)*)result, &g_VulkanHook->m_ActiveHookList[(size_t)HIdx::SYMBOL], &VulkanHook::SYMBOL);			\
-																																													\
-				const auto& commandHook = s_DeviceCommandMap.GetCommandHookFromDeviceHandle(device, NAME);																			\
-				if (commandHook.has_value() && !commandHook.value().get()->IsValid()) {																								\
-					commandHook.value().get()->SetName("ICD - " LOGNAME);																											\
-					if (commandHook.value().get()->Create()) {																														\
-						RH_RHOOK_INFO("[VULKAN HOOK] Hooked ICD " LOGNAME " at {:p} for device: {:p}", (void*)result, (void*)device);												\
-					}																																								\
-					else {																																							\
-						RH_RHOOK_ERROR("[VULKAN HOOK] Failed to hook " LOGNAME " at {:p} obtained from vkGetDeviceProcAddr(). Device = {:p}", (void*)result, (void*)device);		\
-					}																																								\
-				}																																									\
+#define ADD_DEVICE_ICD_COMMAND_HOOK(SYMBOL, NAME, LOGNAME) if (!strcmp(pName, NAME) && result != (decltype(result))g_VulkanHook->s_HookList[(size_t)HIdx::SYMBOL]->GetTarget().As<PFN_vkVoidFunction>()) {	\
+				s_DeviceCommandMap.Map(device, NAME, (decltype(VulkanHook::SYMBOL)*)result, &g_VulkanHook->m_ActiveHookList[(size_t)HIdx::SYMBOL], &VulkanHook::SYMBOL);									\
+																																																			\
+				const auto& commandHook = s_DeviceCommandMap.GetCommandHookFromDeviceHandle(device, NAME);																									\
+				if (commandHook.has_value() && !commandHook.value().get()->IsValid()) {																														\
+					commandHook.value().get()->SetName("ICD - " LOGNAME);																																	\
+					if (commandHook.value().get()->Create()) {																																				\
+						RHOOK_INFO("[VULKAN HOOK] Hooked ICD " LOGNAME " at {:p} for device: {:p}", (void*)result, (void*)device);																		\
+					}																																														\
+					else {																																													\
+						RHOOK_ERROR("[VULKAN HOOK] Failed to hook " LOGNAME " at {:p} obtained from vkGetDeviceProcAddr(). Device = {:p}", (void*)result, (void*)device);								\
+					}																																														\
+				}																																															\
 			}
 
 		if (result != NULL) {

@@ -1,53 +1,36 @@
-#include "./Logging.hpp"
-
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog/sinks/basic_file_sink.h>
+#include "Logging.hpp"
+#include <RHook/log/Logging.hpp>
 
 namespace RHook {
+	namespace Logging {
+		void SetTrace(LogCallBackFn_t fnTrace) { 
+			Log::SetTrace(fnTrace); 
+		};
 
-	std::shared_ptr<spdlog::logger> Log::s_RHookLogger{};
-	std::shared_ptr<spdlog::logger> Log::s_UserLogger{};
-	bool Log::s_Inited{ false };
+		void SetInfo(LogCallBackFn_t fnInfo) {
+			Log::SetInfo(fnInfo);
+		};
 
-	void Log::Init()
-	{
-		std::vector<spdlog::sink_ptr> logSinks;
-		logSinks.emplace_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-		logSinks.emplace_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>("RHook.log", true));
+		void SetWarn(LogCallBackFn_t fnWarn) {
+			Log::SetWarn(fnWarn);
+		};
 
-		// Output pattern
-		logSinks[0]->set_pattern("%^[%T] %n: %v%$");
-		logSinks[1]->set_pattern("[%T] [%l] %n: %v");
+		void SetError(LogCallBackFn_t fnError) {
+			Log::SetError(fnError);
+		};
 
-		s_RHookLogger = std::make_shared<spdlog::logger>("RHook", begin(logSinks), end(logSinks));
-		spdlog::register_logger(s_RHookLogger);
-		s_RHookLogger->set_level(spdlog::level::trace);
-		s_RHookLogger->flush_on(spdlog::level::trace);
-
-		s_UserLogger = std::make_shared<spdlog::logger>("APP", begin(logSinks), end(logSinks));
-		spdlog::register_logger(s_UserLogger);
-		s_UserLogger->set_level(spdlog::level::trace);
-		s_UserLogger->flush_on(spdlog::level::trace);
+		void SetCritical(LogCallBackFn_t fnCritical) {
+			Log::SetCritical(fnCritical);;
+		};
 	}
 
-	std::shared_ptr<spdlog::logger>& Log::GetRHookLogger()
+	std::shared_ptr<RHook::Log::Logger>& Log::GetLogger()
 	{
-		if (!s_Inited) {
-			Log::Init();
-			s_Inited = true;
+		if (!s_RHookLogger) {
+			s_RHookLogger = std::make_unique<Logger>();
 		}
 
 		return s_RHookLogger;
-	}
-
-	std::shared_ptr<spdlog::logger>& Log::GetUserLogger()
-	{
-		if (!s_Inited) {
-			Log::Init();
-			s_Inited = true;
-		}
-
-		return s_UserLogger;
 	}
 
 }

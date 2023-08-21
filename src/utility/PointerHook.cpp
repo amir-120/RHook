@@ -1,10 +1,10 @@
 #include <stdexcept>
 
 #include <windows.h>
-#include "Log/Logging.hpp"
+#include <log/Logging.hpp>
 
-#include "ProtectionOverride.hpp"
-#include "PointerHook.hpp"
+#include <RHook/utility/ProtectionOverride.hpp>
+#include <RHook/utility/PointerHook.hpp>
 
 namespace RHook {
     PointerHook::PointerHook(void** oldPtr, void* newPtr)
@@ -12,18 +12,18 @@ namespace RHook {
         m_Destination{ newPtr }
     {
         if (oldPtr == nullptr) {
-            RH_RHOOK_ERROR("[POINTER HOOK] oldPtr is nullptr");
+            RHOOK_ERROR("[POINTER HOOK] oldPtr is nullptr");
             throw std::invalid_argument("oldPtr cannot be nullptr");
         }
 
         if (IsBadReadPtr(oldPtr, sizeof(void*))) {
-            spdlog::error("[POINTER HOOK] oldPtr is not readable");
+            RHOOK_ERROR("[POINTER HOOK] oldPtr is not readable");
             throw std::invalid_argument("oldPtr is not readable");
         }
 
         ProtectionOverride overrider{ oldPtr, sizeof(void*), PAGE_EXECUTE_READWRITE };
 
-        RH_RHOOK_INFO("[POINTER HOOK] Hooking {:x}->{:x} to {:x}!", (uintptr_t)oldPtr, (uintptr_t)*oldPtr, (uintptr_t)newPtr);
+        RHOOK_INFO("[POINTER HOOK] Hooking {:x}->{:x} to {:x}!", (uintptr_t)oldPtr, (uintptr_t)*oldPtr, (uintptr_t)newPtr);
 
         m_Original = *oldPtr;
         *oldPtr = newPtr;
@@ -40,7 +40,7 @@ namespace RHook {
                 *m_ReplacePtr = m_Original;
             }
             catch (std::exception& e) {
-                RH_RHOOK_ERROR("[POINTER HOOK] Exception Thrown: {}", e.what());
+                RHOOK_ERROR("[POINTER HOOK] Exception Thrown: {}", e.what());
                 return false;
             }
         }
@@ -55,7 +55,7 @@ namespace RHook {
                 *m_ReplacePtr = m_Destination;
             }
             catch (std::exception& e) {
-                RH_RHOOK_ERROR("[POINTER HOOK] Exception Thrown: {}", e.what());
+                RHOOK_ERROR("[POINTER HOOK] Exception Thrown: {}", e.what());
                 return false;
             }
         }

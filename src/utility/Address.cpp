@@ -1,15 +1,17 @@
 #include <cstdio>
 
-#include "Address.hpp"
+#include <RHook/utility/Address.hpp>
 
-Address::Address()
-    : m_ptr(nullptr)
-{}
+namespace RHook {
+    Address::Address()
+        : m_Ptr(nullptr)
+    {}
 
-Address::Address(void* ptr)
-    : m_ptr(ptr)
-{}
+    Address::Address(void* ptr)
+        : m_Ptr(ptr)
+    {}
 
-Address::Address(uintptr_t addr)
-    : m_ptr((void*)addr)
-{}
+    Address::Address(uintptr_t addr)
+        : m_Ptr((void*)addr)
+    {}
+}

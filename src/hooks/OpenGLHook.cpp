@@ -1,7 +1,7 @@
-#include "OpenGLHook.hpp"
+#include <RHook/hooks/OpenGLHook.hpp>
 
-#include "utility/Thread.hpp"
-#include "Log/Logging.hpp"
+#include <RHook/utility/Thread.hpp>
+#include <log/Logging.hpp>
 
 namespace RHook {
 	static OpenGLHook* g_OpenGLHook = nullptr;
@@ -18,29 +18,27 @@ namespace RHook {
 
 	bool OpenGLHook::Hook()
 	{
-		RH_RHOOK_INFO("Hooking OpenGL");
+		RHOOK_INFO("[OPENGL HOOK] Hooking OpenGL");
 
 		g_OpenGLHook = this;
 
 		auto openGLModule = GetModuleHandleA("opengl32.dll");
 		if (!openGLModule) {
-			RH_RHOOK_ERROR("[OPENGL HOOK] Failed to load opengl32.dll.");
+			RHOOK_ERROR("[OPENGL HOOK] Failed to load opengl32.dll.");
 			return false;
 		}
 
 		auto realSwapBuffersFn = (decltype(SwapBuffers)*)GetProcAddress(openGLModule, "wglSwapBuffers");
 		if (!realSwapBuffersFn) {
-			RH_RHOOK_ERROR("[OPENGL HOOK] Failed to load wglSwapBuffers() export.");
+			RHOOK_ERROR("[OPENGL HOOK] Failed to load wglSwapBuffers() export.");
 			return false;
 		}
 
 		ThreadSuspender suspender{};
 
-#define ADD_HOOK(SYMBOL) s_HookList[(size_t)HIdx::SYMBOL] = std::make_unique<FunctionHook>(real##SYMBOL##Fn, (uintptr_t)&OpenGLHook::SYMBOL, #SYMBOL"()");
+#define ADD_HOOK(SYMBOL) s_HookList[(size_t)HIdx::SYMBOL] = std::make_unique<Detour_t>(real##SYMBOL##Fn, (uintptr_t)&OpenGLHook::SYMBOL, 0, #SYMBOL"()");
 
 		ADD_HOOK(SwapBuffers)
-
-		suspender.Resume();
 
 		// Enable detours
 		for (auto& execute : s_DetourExecutionList) {
@@ -55,7 +53,7 @@ namespace RHook {
 				m_ActiveHookList[i] = s_HookList[i].get();
 			}
 			else {
-				RH_RHOOK_ERROR("[OPENGL HOOK] Failed to hook {:s}", s_HookList[i]->GetName());
+				RHOOK_ERROR("[OPENGL HOOK] Failed to hook {:s}", s_HookList[i]->GetName());
 				s_Hooked = false;
 			}
 		}
@@ -74,6 +72,8 @@ namespace RHook {
 			return false;
 		}
 
+		suspender.Resume();
+
 		return s_Hooked;
 	}
 
@@ -82,7 +82,7 @@ namespace RHook {
 		bool unhooked = true;
 
 		for (auto& hook : s_HookList) {
-			if (hook) unhooked = unhooked && hook->Remove();
+			if (hook) unhooked = unhooked && hook->Unhook();
 		}
 
 		if (unhooked) {
@@ -112,8 +112,8 @@ namespace RHook {
 				  auto&	pResult = *(decltype(RESULT)**)&s_ResultList[(size_t)HIdx::SYMBOL];													\
 																																			\
 			/*This line must be called before calling our detour function because we might have to unhook the function inside our detour.	\
-			*/auto originalFn = hook->GetOriginal<decltype(OpenGLHook::SYMBOL)>();															\
-			auto realFn = hook->GetTarget<decltype(OpenGLHook::SYMBOL)>();																	\
+			*/auto originalFn = hook->GetTrampoline<decltype(OpenGLHook::SYMBOL)*>();															\
+			auto realFn = hook->GetTarget<decltype(OpenGLHook::SYMBOL)*>();																	\
 																																			\
 			if (g_OpenGLHook != nullptr && executeDetour && callDepth == 0) {																\
 				static SYMBOL##Parameters_t tmpParams = { __VA_ARGS__ };																	\

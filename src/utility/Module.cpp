@@ -5,8 +5,10 @@
 #include <windows.h>
 #include <winternl.h>
 
-#include "String.hpp"
-#include "Module.hpp"
+#include <RHook/utility/String.hpp>
+#include <RHook/utility/Module.hpp>
+
+#pragma comment(lib, "shlwapi.lib")
 
 namespace RHook {
 	IMAGE_DOS_HEADER* GetAppModuleHandle() {

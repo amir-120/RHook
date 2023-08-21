@@ -1,7 +1,6 @@
-#include "D3D11Hook.hpp"
-#include "D3DDXGIVMTIndices.hpp"
+#include <RHook/hooks/D3D11Hook.hpp>
 
-#include "Log/Logging.hpp"
+#include <log/Logging.hpp>
 
 namespace RHook {
     static D3D11Hook* g_d3d11Hook = nullptr;
@@ -16,7 +15,7 @@ namespace RHook {
     }
 
     bool D3D11Hook::Hook() {
-        RH_RHOOK_INFO("Hooking D3D11");
+        RHOOK_INFO("[D3D11 HOOK] Hooking D3D11");
 
         g_d3d11Hook = this;
 
@@ -28,13 +27,13 @@ namespace RHook {
         // Manually get D3D11CreateDeviceAndSwapChain export
         const auto d3d11Module = LoadLibrary("d3d11.dll");
         if (d3d11Module == nullptr) {
-            RH_RHOOK_ERROR("D3D11: Failed to load d3d11.dll.");
+            RHOOK_ERROR("D3D11: Failed to load d3d11.dll.");
             return false;
         }
         auto d3d11CreateDevice = (decltype(D3D11CreateDevice)*)GetProcAddress(d3d11Module, "D3D11CreateDevice");
 
         if (d3d11CreateDevice == nullptr) {
-            RH_RHOOK_ERROR("D3D11: Failed to get the D3D11CreateDevice() export.");
+            RHOOK_ERROR("D3D11: Failed to get the D3D11CreateDevice() export.");
             return false;
         }
 
@@ -43,12 +42,12 @@ namespace RHook {
         if (auto hr = d3d11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr,
             createDeviceFlags, &featureLevel, 1, D3D11_SDK_VERSION,
             &pDevice, nullptr, &pContext); FAILED(hr)) {
-            RH_RHOOK_ERROR("D3D11: Failed to create D3D11 device. ERROR: {:s}", WINCOM_ERROR(hr));
+            RHOOK_ERROR("D3D11: Failed to create D3D11 device. ERROR: {:s}", WINCOM_ERROR(hr));
             return false;
         }
 
         if (!HookDXGI(pDevice.Get())) {
-            RH_RHOOK_ERROR("D3D11: Failed to hook DXGI.");
+            RHOOK_ERROR("D3D11: Failed to hook DXGI.");
             return false;
         }
 

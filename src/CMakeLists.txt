@@ -1,66 +1,76 @@
-set(INCLUDE_SRC
-    Include/RenderHook.hpp
-)
-
-set(LOGGING_SRC
-    Log/Logging.hpp
-    Log/Logging.cpp
-)
-
 set(HOOKS_SRC
-    hooks/D3D9VMTIndices.hpp
-    hooks/D3DDXGIVMTIndices.hpp
     hooks/D3D9Hook.cpp
-    hooks/D3D9Hook.hpp
     hooks/DXGIHook.cpp
-    hooks/DXGIHook.hpp
     hooks/D3D10Hook.cpp
-    hooks/D3D10Hook.hpp
     hooks/D3D11Hook.cpp
-    hooks/D3D11Hook.hpp
     hooks/D3D12Hook.cpp
-    hooks/D3D12Hook.hpp
     hooks/OpenGLHook.cpp
-    hooks/OpenGLHook.hpp
     hooks/PresentHook.cpp
-    hooks/PresentHook.hpp
     hooks/VulkanHook.cpp
-    hooks/VulkanHook.hpp
     hooks/WindowsMessageHook.cpp
-    hooks/WindowsMessageHook.hpp
 )
 
 set(UTILITIES_SRC
     utility/Address.cpp
-    utility/Address.hpp
-    utility/FunctionHook.cpp
-    utility/FunctionHook.hpp
+    utility/Detour.cpp
     utility/SmartFunctionHook.cpp
-    utility/SmartFunctionHook.hpp
     utility/PointerHook.cpp
-    utility/PointerHook.hpp
     utility/ProtectionOverride.cpp
-    utility/ProtectionOverride.hpp
     utility/String.cpp
-    utility/String.hpp
     utility/Thread.cpp
-    utility/Thread.hpp
     utility/VtableHook.cpp
-    utility/VtableHook.hpp
-    utility/Module.hpp
     utility/Module.cpp
 )
 
-source_group("Include" FILES ${INCLUDE_SRC})
-source_group("Logging" FILES ${LOGGING_SRC})
+set(LOGGING_SRC
+    log/Logging.hpp
+    log/Logging.cpp
+)
+
+set(INCLUDE_SRC_HOOKS
+    ${INCLUDE_HEADERS_DIR}/RHook/hooks/D3D9VMTIndices.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/hooks/D3DDXGIVMTIndices.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/hooks/D3D9Hook.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/hooks/DXGIHook.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/hooks/D3D10Hook.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/hooks/D3D11Hook.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/hooks/D3D12Hook.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/hooks/OpenGLHook.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/hooks/PresentHook.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/hooks/VulkanHook.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/hooks/WindowsMessageHook.hpp
+)
+
+set(INCLUDE_SRC_UTILS
+    ${INCLUDE_HEADERS_DIR}/RHook/utility/Address.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/utility/Detour.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/utility/SmartFunctionHook.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/utility/PointerHook.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/utility/ProtectionOverride.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/utility/String.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/utility/Thread.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/utility/VtableHook.hpp
+    ${INCLUDE_HEADERS_DIR}/RHook/utility/Module.hpp
+)
+
+source_group("Include" FILES ${INCLUDE_HEADERS_DIR}/RHook/RenderHook.hpp)
+source_group("Include/log" FILES ${INCLUDE_HEADERS_DIR}/RHook/log/Logging.hpp)
+source_group("Include/hooks" FILES ${INCLUDE_SRC_HOOKS})
+source_group("Include/utility" FILES ${INCLUDE_SRC_UTILS})
+
 source_group("Hooks" FILES ${HOOKS_SRC})
 source_group("Utilties" FILES ${UTILITIES_SRC})
-source_group("Application" FILES ${APPLICATION_SRC})
+source_group("Logging" FILES ${LOGGING_SRC})
+
+source_group("Init" FILES Initialization.cpp)
 
 add_library(${CMAKE_PROJECT_NAME} STATIC
             Initialization.cpp
-            ${INCLUDE_SRC}
+            ${INCLUDE_HEADERS_DIR}/RHook/RenderHook.hpp
+            ${INCLUDE_HEADERS_DIR}/RHook/log/Logging.hpp
             ${LOGGING_SRC}
+            ${INCLUDE_SRC_HOOKS}
+            ${INCLUDE_SRC_UTILS}
             ${HOOKS_SRC}
             ${UTILITIES_SRC}
 )
@@ -83,10 +93,10 @@ endif()
 
 link_directories(${VULKAN_PATH}/Bin;${VULKAN_PATH}/Lib;)
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC Detours libffi spdlog d3d9 d3d10 d3d11 d3d12 OpenGL32 ${Vulkan_LIBRARY})
+target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC Detours libffi fmt d3d9 d3d10 d3d11 d3d12 OpenGL32 ${Vulkan_LIBRARY})
 target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /GS- /GR-)
 target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_20)
 
 include_directories(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_PROJECT_NAME} ${Vulkan_INCLUDE_DIRS})
-include_directories(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/Include)
+include_directories(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)

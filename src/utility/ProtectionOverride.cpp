@@ -1,9 +1,9 @@
 #include <stdexcept>
 
 #include <windows.h>
-#include "Log/Logging.hpp"
+#include <log/Logging.hpp>
 
-#include "ProtectionOverride.hpp"
+#include <RHook/utility/ProtectionOverride.hpp>
 
 namespace RHook {
     ProtectionOverride::ProtectionOverride(void* address, size_t size, uint32_t protection)
@@ -11,7 +11,7 @@ namespace RHook {
         m_Size{ size }
     {
         if (!VirtualProtect(address, size, protection, (DWORD*)&m_Old)) {
-            RH_RHOOK_ERROR("[POINTER HOOK] VirtualProtect failed. Address: {:p}", address);
+            RHOOK_ERROR("[POINTER HOOK] VirtualProtect failed. Address: {:p}", address);
             throw std::runtime_error("VirtualProtect failed");
         }
     }

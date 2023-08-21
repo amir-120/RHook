@@ -1,7 +1,7 @@
-#include "D3D9Hook.hpp"
-#include "D3D9VMTIndices.hpp"
+#include <RHook/hooks/D3D9Hook.hpp>
 
-#include "Log/Logging.hpp"
+#include <log/Logging.hpp>
+#include <RHook/utility/Thread.hpp>
 
 namespace RHook {
 	static D3D9Hook* g_D3D9Hook{ nullptr };
@@ -17,7 +17,7 @@ namespace RHook {
 	}
 
 	bool D3D9Hook::Hook() {
-		RH_RHOOK_INFO("Hooking D3D9");
+		RHOOK_INFO("[D3D9 HOOK] Hooking D3D9");
 
 		// Set hook object preemptively -- otherwise, the hook is written and is likely
 		// to execute and crash before we verify success.
@@ -32,23 +32,23 @@ namespace RHook {
 		auto d3d9Module = LoadLibrary("d3d9.dll");
 
 		if (d3d9Module == nullptr) {
-			RH_RHOOK_ERROR("[D3D9 HOOK] Failed to load d3d9.dll.");
+			RHOOK_ERROR("[D3D9 HOOK] Failed to load d3d9.dll.");
 			return false;
 		}
 
 		auto realDirect3DCreate9Fn = (decltype(Direct3DCreate9)*)GetProcAddress(d3d9Module, "Direct3DCreate9");
 
 		if (realDirect3DCreate9Fn == nullptr) {
-			RH_RHOOK_ERROR("[D3D9 HOOK] Couldn't find Direct3DCreate9.");
+			RHOOK_ERROR("[D3D9 HOOK] Couldn't find Direct3DCreate9.");
 			return false;
 		}
 
-		RH_RHOOK_INFO("[D3D9 HOOK] Got Direct3DCreate9 {:p}", (void*)realDirect3DCreate9Fn);
+		RHOOK_INFO("[D3D9 HOOK] Got Direct3DCreate9 {:p}", (void*)realDirect3DCreate9Fn);
 
 		auto d3d = realDirect3DCreate9Fn(D3D_SDK_VERSION);
 
 		if (d3d == nullptr) {
-			RH_RHOOK_ERROR("[D3D9 HOOK] Failed to create IDirect3D9.");
+			RHOOK_ERROR("[D3D9 HOOK] Failed to create IDirect3D9.");
 			return false;
 		}
 
@@ -68,7 +68,7 @@ namespace RHook {
 		if (auto hr = d3d->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_NULLREF, hWnd,
 			D3DCREATE_HARDWARE_VERTEXPROCESSING | D3DCREATE_NOWINDOWCHANGES, &pp, &device); FAILED(hr))
 		{
-			RH_RHOOK_ERROR("[D3D9 HOOK] Failed to create D3D9 device. ERROR: {:s}", WINCOM_ERROR(hr));
+			RHOOK_ERROR("[D3D9 HOOK] Failed to create D3D9 device. ERROR: {:s}", WINCOM_ERROR(hr));
 			d3d->Release();
 			return false;
 		}
@@ -78,7 +78,9 @@ namespace RHook {
 		auto realResetFn = (*(uintptr_t**)device)[(size_t)IDirect3DDevice9VMT::Reset];
 		auto realEndSceneFn = (*(uintptr_t**)device)[(size_t)IDirect3DDevice9VMT::EndScene];
 
-#define ADD_HOOK(SYMBOL) s_HookList[(size_t)HIdx::SYMBOL] = std::make_unique<FunctionHook>(real##SYMBOL##Fn, (uintptr_t)&D3D9Hook::SYMBOL, #SYMBOL"()");
+		ThreadSuspender suspender{};
+
+#define ADD_HOOK(SYMBOL) s_HookList[(size_t)HIdx::SYMBOL] = std::make_unique<Detour_t>(real##SYMBOL##Fn, (uintptr_t)&D3D9Hook::SYMBOL, 0, #SYMBOL"()");
 
 		ADD_HOOK(Present)
 		ADD_HOOK(Reset)
@@ -100,7 +102,7 @@ namespace RHook {
 				m_ActiveHookList[i] = s_HookList[i].get();
 			}
 			else {
-				RH_RHOOK_ERROR("[D3D9 HOOK] Failed to hook {:s}", s_HookList[i]->GetName());
+				RHOOK_ERROR("[D3D9 HOOK] Failed to hook {:s}", s_HookList[i]->GetName());
 				s_Hooked = false;
 			}
 		}
@@ -119,6 +121,8 @@ namespace RHook {
 			return false;
 		}
 
+		suspender.Resume();
+
 		return s_Hooked;
 	}
 
@@ -128,7 +132,7 @@ namespace RHook {
 		bool unhooked = true;
 
 		for (auto& hook : s_HookList) {
-			if (hook) unhooked = unhooked && hook->Remove();
+			if (hook) unhooked = unhooked && hook->Unhook();
 		}
 
 		if (unhooked) {
@@ -158,9 +162,9 @@ namespace RHook {
 				  auto&	pParams = *(SYMBOL##Parameters_t**)&s_ParamList[(size_t)HIdx::SYMBOL];												\
 				  auto&	pResult = *(decltype(RESULT)**)&s_ResultList[(size_t)HIdx::SYMBOL];													\
 																																			\
-			/*This line must be called before calling our detour function because we might have to unhook the function inside our detour.	\
-			*/auto originalFn = hook->GetOriginal<decltype(D3D9Hook::SYMBOL)>();															\
-			auto realFn = hook->GetTarget<decltype(D3D9Hook::SYMBOL)>();																	\
+			/*This line must be called before calling our detour function because we might have to unhook the function inside our detour.*/	\
+			auto originalFn = hook->GetTrampoline<decltype(D3D9Hook::SYMBOL)*>();															\
+			auto realFn = hook->GetTarget<decltype(D3D9Hook::SYMBOL)*>();																	\
 																																			\
 			if (g_D3D9Hook != nullptr && executeDetour && callDepth == 0) {																	\
 				static SYMBOL##Parameters_t tmpParams = { __VA_ARGS__ };																	\
