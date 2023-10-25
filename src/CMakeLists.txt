@@ -1,3 +1,5 @@
+project(RHook)
+
 set(HOOKS_SRC
     hooks/D3D9Hook.cpp
     hooks/DXGIHook.cpp
@@ -64,7 +66,7 @@ source_group("Logging" FILES ${LOGGING_SRC})
 
 source_group("Init" FILES Initialization.cpp)
 
-add_library(${CMAKE_PROJECT_NAME} STATIC
+add_library(${PROJECT_NAME} STATIC
             Initialization.cpp
             ${INCLUDE_HEADERS_DIR}/RHook/RenderHook.hpp
             ${INCLUDE_HEADERS_DIR}/RHook/log/Logging.hpp
@@ -93,10 +95,15 @@ endif()
 
 link_directories(${VULKAN_PATH}/Bin;${VULKAN_PATH}/Lib;)
 
-target_link_libraries(${CMAKE_PROJECT_NAME} PUBLIC Detours libffi fmt d3d9 d3d10 d3d11 d3d12 OpenGL32 ${Vulkan_LIBRARY})
-target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC /GS- /GR-)
-target_compile_features(${CMAKE_PROJECT_NAME} PUBLIC cxx_std_20)
+target_link_libraries(${PROJECT_NAME} PUBLIC Detours libffi fmt d3d9 d3d10 d3d11 d3d12 OpenGL32 ${Vulkan_LIBRARY})
+target_compile_options(${PROJECT_NAME} PUBLIC /GS- /GR-)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
-include_directories(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_PROJECT_NAME} ${Vulkan_INCLUDE_DIRS})
-include_directories(${CMAKE_PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${PROJECT_NAME} ${Vulkan_INCLUDE_DIRS})
+include_directories(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES 
+OUTPUT_NAME RHook)
+
+target_compile_options(${PROJECT_NAME} PUBLIC /EHa)
