@@ -4,10 +4,10 @@ project(RenderHook)
 
 SET(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
-include_directories(${CMAKE_SOURCE_DIR}/dependencies/Detours/Detours/src)
-include_directories(${CMAKE_SOURCE_DIR}/dependencies/fmt/include)
-include_directories(${CMAKE_SOURCE_DIR}/dependencies/libffi/libffi/include)
+include_directories(include)
+include_directories(dependencies/Detours/Detours/src)
+include_directories(dependencies/fmt/include)
+include_directories(dependencies/libffi/libffi/include)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/dependencies/libffi/libffi/include)
 
 add_compile_options(/W0)

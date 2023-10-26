@@ -15,7 +15,7 @@ namespace RHook {
 		struct Logger {
 			template<typename... Args>
 			void Trace(fmt::v10::format_string<Args...> fmt, Args&&... args) {
-				if (FnTrace)
+				if (!FnTrace)
 					return;
 
 				const auto output = fmt::format(fmt, std::forward<Args>(args)...);
@@ -24,7 +24,7 @@ namespace RHook {
 
 			template<typename... Args>
 			void Info(fmt::v10::format_string<Args...> fmt, Args&&... args) {
-				if (FnInfo)
+				if (!FnInfo)
 					return;
 
 				const auto output = fmt::format(fmt, std::forward<Args>(args)...);
@@ -33,7 +33,7 @@ namespace RHook {
 
 			template<typename... Args>
 			void Warn(fmt::v10::format_string<Args...> fmt, Args&&... args) {
-				if (FnWarn)
+				if (!FnWarn)
 					return;
 
 				const auto output = fmt::format(fmt, std::forward<Args>(args)...);
@@ -42,7 +42,7 @@ namespace RHook {
 
 			template<typename... Args>
 			void Error(fmt::v10::format_string<Args...> fmt, Args&&... args) {
-				if (FnError)
+				if (!FnError)
 					return;
 
 				const auto output = fmt::format(fmt, std::forward<Args>(args)...);
@@ -51,7 +51,7 @@ namespace RHook {
 
 			template<typename... Args>
 			void Critical(fmt::v10::format_string<Args...> fmt, Args&&... args) {
-				if (FnCritical)
+				if (!FnCritical)
 					return;
 
 				const auto output = fmt::format(fmt, std::forward<Args>(args)...);
