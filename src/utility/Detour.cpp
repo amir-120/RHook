@@ -13,10 +13,8 @@ namespace RHook {
 		std::scoped_lock _{ m_HookMutex };
 
 		if (Create()) {
-			Hook();
+			RHOOK_INFO("[DETOUR] \"{:s}\" Initialized hook on {:p}->{:p}", m_Name.c_str(), target.Ptr(), destination.Ptr());
 		}
-
-		RHOOK_INFO("[DETOUR] \"{:s}\" Setting up a hook on {:p}->{:p}", m_Name.c_str(), target.Ptr(), destination.Ptr());
 	}
 
 	Detour_t::~Detour_t()
@@ -127,7 +125,7 @@ namespace RHook {
 	bool Detour_t::Unhook()
 	{
 		if (m_Trampoline.Ptr() == nullptr) {
-			RHOOK_WARN("[DETOUR] \"{:s}\" .Hook() called while the detour is not placed!", m_Name);
+			RHOOK_WARN("[DETOUR] \"{:s}\" .Unhook() called while the detour is not placed!", m_Name);
 			return true;
 		}
 

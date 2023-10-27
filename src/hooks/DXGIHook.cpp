@@ -92,7 +92,7 @@ namespace RHook {
 
 		// Set the active hooks
 		for (size_t i = 0; i < s_HookList.size(); i++) {
-			if (s_HookList[i]->Create()) {
+			if (s_HookList[i]->Hook()) {
 				m_ActiveHookList[i] = s_HookList[i].get();
 			}
 			else {
